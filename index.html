@@ -1,5 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Warrior</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-black">
+    <div id="root"></div>
+    <!-- React and Babel -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
 // --- MOCK DATA ---
 // NEW: Replaced placeholder missions with your specific PUSH/PULL/LEGS routines.
 const initialOperatorData = {
@@ -299,7 +312,7 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp }) => {
 
 // --- MAIN APP COMPONENT ---
 
-export default function App() {
+function App() {
   const [operator, setOperator] = useState(initialOperatorData);
   const [missions, setMissions] = useState(missionsData);
   const [currentScreen, setCurrentScreen] = useState('board');
@@ -374,3 +387,8 @@ export default function App() {
     </div>
   );
 }
+
+ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
