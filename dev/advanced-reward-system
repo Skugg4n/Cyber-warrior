@@ -1,0 +1,55 @@
+AEGIS Protocol: Advanced Reward System
+Part 1: Full Explanation - The Two-Currency Economy
+To properly reward both raw effort and strategic engagement, we will expand the AEGIS economy to include two distinct forms of currency:
+
+DATA_PACKETS (XP): This remains the foundation of your Operator's progression. You earn XP primarily through physical output—the total volume of weight lifted and reps completed. Its sole purpose is to increase your Operator Level, unlocking more challenging directives and passive system upgrades. XP is a direct measure of your power and cannot be bought or traded.
+
+C-Creds (Cyber Credits): This is the new strategic currency. C-Creds are not earned from raw effort, but by demonstrating efficiency, consistency, and problem-solving. Think of them as the currency of the digital underworld within the AEGIS Mainframe. You earn them by being a smart and dedicated Operator, and you spend them to gain tactical advantages and unique customizations.
+
+This two-currency system ensures that while the core path to power is through the hard work of exercise (XP), a deeper level of engagement is rewarded with a flexible currency (C-Creds) that allows for personalization and strategic planning.
+
+Part 2: Detailed Breakdown - Earning and Spending C-Creds
+This new system introduces new ways to be rewarded and a new place to spend those rewards.
+
+How to Earn C-Creds
+You acquire C-Creds by going above and beyond the basic requirements of a directive.
+
+Performance Optimization (Beating Your PRs): When you complete a set that surpasses your "previous" record, the system flags it as a PERFORMANCE_BREAKTHROUGH and rewards a small amount of C-Creds.
+
+Streak Calibration (Consistency is Key): Completing workouts on a 3-day or 7-day streak awards bonus C-Creds.
+
+Directive Efficiency (Flawless Execution): Completing every target set for every exercise in a directive awards a C-Cred bonus.
+
+Solving System Glitches (Unique Events): Special [GLITCHED] directives on the message board offer large C-Cred payouts.
+
+How to Spend C-Creds: The //BLACK_MARKET
+C-Creds can be spent in a new section of the app, accessed via the main menu: [4] //BLACK_MARKET. This is a hidden shop run by anonymous data brokers.
+
+Schematics & Cosmetics: The primary use for C-Creds. The Black Market offers exclusive AUGMENT schematics for your Operator Profile, all rendered in detailed ASCII art.
+
+Examples: CHASSIS_CHROMA_PACK (changes text color theme), HOLOTAG_EMITTER (a custom ASCII art symbol next to your name), STARTUP_SEQUENCE_v2.1 (a custom boot-up text animation).
+
+Data Decryption Keys: Purchase keys to unlock [REDACTED] information on the message board, revealing lore or secret missions.
+
+Single-Use Tactical Programs (Consumables): Purchase temporary boosts like Overclock.exe (XP multiplier) or Glitch_Filter.pak (streak protection).
+
+Part 3: Active System Engagement - Rest Period Minigames
+To transform rest periods from downtime into active engagement, a timed minigame becomes available between sets.
+
+Activation: After logging a set, a rest timer (e.g., 90 seconds) begins. A prompt appears: > SYSTEM IDLE. INITIATE //DEFRAG? [Y/N]
+
+The Minigame: //DEFRAG
+
+Concept: A simple, ASCII-based "Asteroids" style game. Your cursor is a ship ^. Fragmented data blocks # and corrupted packets * drift across the screen.
+
+Gameplay: You move your ship and "fire" a laser | to destroy the fragments. The game is designed to be played in short, intense bursts.
+
+Goal: Destroy as many fragments as possible before the rest timer expires.
+
+Cut-off: When the timer hits zero, the game screen immediately vanishes and is replaced with: > REST PERIOD COMPLETE. RESUME DIRECTIVE. This hard cut-off is crucial to keep the focus on the workout.
+
+The Reward:
+
+Your score in //DEFRAG is converted into a small amount of C-Creds.
+
+This creates a compelling loop: work out, play a game to earn tactical currency, use that currency to get advantages for your next workout. It makes the rest period a valuable part of the session.
