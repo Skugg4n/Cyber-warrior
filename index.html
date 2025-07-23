@@ -22,7 +22,9 @@ const initialOperatorData = {
   xp: 0,
   xpToNextLevel: 1000,
   systemIntegrity: '99.8%',
+  cCreds: 0,
   augments: ['Stock Chassis Mk I'],
+  inventory: [],
 };
 
 const missionsData = [
@@ -122,16 +124,17 @@ const Typewriter = ({ text, speed = 30 }) => {
 const BBSHeader = ({ operator, onNav }) => (
   <div className="border-2 border-green-500 p-2 font-mono text-green-400 bg-black">
     <div className="flex justify-between items-center border-b-2 border-green-500 pb-1 mb-1">
-      <h1 className="text-lg md:text-xl font-bold">[A.E.G.I.S] PROTOCOL</h1>
+      <h1 className="text-lg md:text-xl font-bold">[A.E.G.I.S] PROTOCOL v1.1</h1>
       <div className="text-xs text-right">
         <div>OPERATOR ID: {operator.id}</div>
         <div>SYS. INTEGRITY: {operator.systemIntegrity}</div>
+        <div>C-Creds: {operator.cCreds}c</div>
       </div>
     </div>
     <div className="flex justify-around text-xs md:text-sm">
         <button onClick={() => onNav('board')} className="hover:bg-green-500 hover:text-black p-1">[1] //MSG_BOARD</button>
         <button onClick={() => onNav('profile')} className="hover:bg-green-500 hover:text-black p-1">[2] OPERATOR_PROFILE</button>
-        <button className="text-gray-600 p-1 cursor-not-allowed">[3] //BOUNTY_CONTRACTS</button>
+        <button onClick={() => onNav('market')} className="hover:bg-green-500 hover:text-black p-1">[3] //BLACK_MARKET</button>
         <button className="text-gray-600 p-1 cursor-not-allowed">[4] LOGOUT</button>
     </div>
   </div>
@@ -175,6 +178,10 @@ const OperatorProfile = ({ operator, onNav }) => (
                 </div>
             </div>
             <div>
+                <p className="text-green-400">C-CREDS:</p>
+                <p className="ml-4 text-white">{operator.cCreds}c</p>
+            </div>
+            <div>
                 <p className="text-green-400">AUGMENTATIONS:</p>
                 <ul className="list-disc list-inside ml-4 text-green-400">
                     {operator.augments.map((aug, index) => (
@@ -189,6 +196,56 @@ const OperatorProfile = ({ operator, onNav }) => (
          </button>
     </div>
 );
+
+const marketItems = [
+    { id: 'item_gf', name: 'Glitch_Filter.pak', cost: 150, description: 'A single-use packet that purges one system fault.' }
+];
+
+const BlackMarket = ({ operator, onPurchase, onNav }) => (
+    <div className="p-2 md:p-4">
+        <h2 className="text-lg font-bold mb-2 text-green-400">{'//'}BLACK_MARKET - Encrypted Node</h2>
+        <p className="text-sm mb-2">OPERATOR C-Creds: {operator.cCreds}c</p>
+        <div className="border border-green-500 p-2 bg-black/50 space-y-2">
+            {marketItems.map(item => (
+                <div key={item.id} className="border-b border-gray-700 pb-2">
+                    <p>{'>'} {item.name} [COST: {item.cost}c]</p>
+                    <p className="text-xs text-gray-400">{item.description}</p>
+                    <button onClick={() => onPurchase(item)} className="mt-1 bg-green-600 text-black font-bold py-1 px-2 hover:bg-green-400 border border-green-400">[PURCHASE]</button>
+                </div>
+            ))}
+        </div>
+        <button onClick={() => onNav('board')} className="mt-4 bg-green-600 text-black font-bold py-1 px-3 hover:bg-green-400 border border-green-400">&lt; RETURN TO BOARD</button>
+    </div>
+);
+
+const DefragMinigame = ({ onGameEnd }) => {
+    const canvasRef = React.useRef(null);
+    const [score, setScore] = React.useState(0);
+
+    React.useEffect(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        let frame;
+        let x = canvas.width / 2;
+        let bullets = [];
+        const keyHandler = (e) => {
+            if (e.key === ' ') bullets.push({ y: canvas.height - 20 });
+            if (e.key === 'ArrowLeft') x -= 10;
+            if (e.key === 'ArrowRight') x += 10;
+        };
+        window.addEventListener('keydown', keyHandler);
+        const loop = () => {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.fillText('^', x, canvas.height - 10);
+            bullets.forEach(b => { b.y -= 5; ctx.fillText('|', x, b.y); if (b.y < 0) { setScore(s => s+1); }});
+            frame = requestAnimationFrame(loop);
+        };
+        loop();
+        return () => { cancelAnimationFrame(frame); window.removeEventListener('keydown', keyHandler); onGameEnd(score); };
+    }, [score, onGameEnd]);
+    return <canvas ref={canvasRef} width="300" height="150" className="border border-green-500" />;
+};
 
 // --- WORKOUT LOGGER COMPONENTS ---
 
@@ -245,10 +302,12 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
     );
 };
 
-const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp }) => {
+const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp, onUpdateCCreds }) => {
     const [expandedExerciseId, setExpandedExerciseId] = React.useState(mission.exercises[0].id);
     const [sessionSets, setSessionSets] = React.useState({});
     const [feedback, setFeedback] = React.useState('// Begin directive.');
+    const [isResting, setIsResting] = React.useState(false);
+    const [showDefrag, setShowDefrag] = React.useState(false);
 
     const handleToggleExercise = (exerciseId) => {
         setExpandedExerciseId(currentId => (currentId === exerciseId ? null : exerciseId));
@@ -265,7 +324,27 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp }) => {
         setSessionSets({ ...sessionSets, [exerciseId]: [...currentSets, newSet] });
         const xpGained = Math.floor(newSet.reps * (newSet.weight || 1) * 0.5);
         onUpdateXp(xpGained);
-        setFeedback(`// LOGGED: ${reps}x${weight || 0}kg. +${xpGained} DATA PACKETS`);
+
+        const exercise = mission.exercises.find(e => e.id === exerciseId);
+        const prevMatch = exercise.previous.match(/(\d+\.?\d*)kg x (\d+)/);
+        let breakthrough = false;
+        if (prevMatch) {
+            const prevW = parseFloat(prevMatch[1]);
+            const prevR = parseInt(prevMatch[2]);
+            if (newSet.weight > prevW || newSet.reps > prevR) {
+                breakthrough = true;
+            }
+        }
+        if (breakthrough) {
+            onUpdateCCreds(5);
+            setFeedback(`// BREAKTHROUGH! +${xpGained} XP, +5 C-Creds`);
+        } else {
+            setFeedback(`// LOGGED: ${reps}x${weight || 0}kg. +${xpGained} DATA PACKETS`);
+        }
+
+        setIsResting(true);
+        setShowDefrag(false);
+        setTimeout(() => { setIsResting(false); setShowDefrag(false); }, 90000);
     };
 
     const allExercisesComplete = mission.exercises.every(ex => (sessionSets[ex.id] || []).length >= ex.targetSets);
@@ -274,6 +353,15 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp }) => {
         <div className="p-2 md:p-4">
             <h2 className="text-lg font-bold mb-1 text-red-500 animate-pulse">{'>'}! ACTIVE DIRECTIVE: {mission.title}</h2>
             {feedback && <p className="text-green-400 text-sm h-4 mb-2">{feedback}</p>}
+            {isResting && !showDefrag && (
+                <div className="mb-2">
+                    <p>// REST PERIOD ACTIVE</p>
+                    <button onClick={() => setShowDefrag(true)} className="underline">INITIATE //DEFRAG? [Y/N]</button>
+                </div>
+            )}
+            {isResting && showDefrag && (
+                <DefragMinigame onGameEnd={(s) => onUpdateCCreds(Math.floor(s / 10))} />
+            )}
             <div className="border border-red-500 p-2 bg-black/50 space-y-2">
                 {mission.exercises.map(exercise => {
                     const loggedSets = sessionSets[exercise.id] || [];
@@ -299,8 +387,8 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp }) => {
                 })}
             </div>
             <div className="mt-4">
-                <button 
-                    onClick={() => onCompleteMission(mission.xp)} 
+                <button
+                    onClick={() => onCompleteMission(mission.xp, allExercisesComplete)}
                     disabled={!allExercisesComplete}
                     className={`w-full font-bold py-2 px-3 border ${allExercisesComplete ? 'bg-red-600 text-white border-red-400 hover:bg-red-400 animate-pulse' : 'bg-gray-700 text-gray-500 border-gray-600 cursor-not-allowed'}`}
                 >
@@ -330,6 +418,12 @@ function App() {
     setCurrentScreen('logging');
   };
 
+  const handlePurchaseItem = React.useCallback((item) => {
+    if (operator.cCreds >= item.cost) {
+        setOperator(prev => ({ ...prev, cCreds: prev.cCreds - item.cost, inventory: [...prev.inventory, item.name] }));
+    }
+  }, [operator]);
+
   const handleUpdateXp = React.useCallback((xpGained) => {
     setOperator(prev => {
         const newXp = prev.xp + xpGained;
@@ -346,20 +440,28 @@ function App() {
     });
   }, []);
 
-  const handleCompleteMission = React.useCallback((baseXp) => {
+  const handleUpdateCCreds = React.useCallback((c) => {
+    setOperator(prev => ({ ...prev, cCreds: prev.cCreds + c }));
+  }, []);
+
+  const handleCompleteMission = React.useCallback((baseXp, flawless) => {
     handleUpdateXp(baseXp);
     if (activeMission && activeMission.reward.includes('SCHEMATIC')) {
         const schematic = activeMission.reward.split('SCHEMATIC: ')[1];
         setOperator(prev => ({ ...prev, augments: [...prev.augments, schematic] }));
     }
+    if (flawless) {
+        handleUpdateCCreds(50);
+    }
     setActiveMission(null);
     setCurrentScreen('board');
-  }, [activeMission, handleUpdateXp]);
+  }, [activeMission, handleUpdateXp, handleUpdateCCreds]);
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'profile': return <OperatorProfile operator={operator} onNav={handleNavigation} />;
-      case 'logging': return <WorkoutLogger mission={activeMission} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} />;
+      case 'logging': return <WorkoutLogger mission={activeMission} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} onUpdateCCreds={handleUpdateCCreds} />;
+      case 'market': return <BlackMarket operator={operator} onPurchase={handlePurchaseItem} onNav={handleNavigation} />;
       default: return <MissionBoard missions={missions} onSelectMission={handleSelectMission} />;
     }
   };
@@ -382,7 +484,7 @@ function App() {
                 {renderScreen()}
             </main>
             <footer className="border-t-2 border-green-500 p-1 text-center text-xs text-green-500">
-                <p>AEGIS PROTOCOL v1.0 - "Keystroke" | System Status: <span className="text-green-400">NOMINAL</span></p>
+                <p>AEGIS PROTOCOL v1.1 - "Keystroke" | System Status: <span className="text-green-400">NOMINAL</span></p>
             </footer>
         </div>
     </div>
