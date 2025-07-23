@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script type="text/babel">
-    const { useState, useEffect, useCallback } = React;
+    
 // --- MOCK DATA ---
 // NEW: Replaced placeholder missions with your specific PUSH/PULL/LEGS routines.
 const initialOperatorData = {
@@ -100,8 +100,8 @@ const missionsData = [
 // --- HELPER COMPONENTS ---
 
 const Typewriter = ({ text, speed = 30 }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  useEffect(() => {
+  const [displayedText, setDisplayedText] = React.useState('');
+  React.useEffect(() => {
     let i = 0;
     setDisplayedText('');
     const intervalId = setInterval(() => {
@@ -193,8 +193,8 @@ const OperatorProfile = ({ operator, onNav }) => (
 // --- WORKOUT LOGGER COMPONENTS ---
 
 const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
-    const [reps, setReps] = useState('');
-    const [weight, setWeight] = useState('');
+    const [reps, setReps] = React.useState('');
+    const [weight, setWeight] = React.useState('');
 
     const handleLogSet = (e) => {
         e.preventDefault();
@@ -246,9 +246,9 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
 };
 
 const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp }) => {
-    const [expandedExerciseId, setExpandedExerciseId] = useState(mission.exercises[0].id);
-    const [sessionSets, setSessionSets] = useState({});
-    const [feedback, setFeedback] = useState('// Begin directive.');
+    const [expandedExerciseId, setExpandedExerciseId] = React.useState(mission.exercises[0].id);
+    const [sessionSets, setSessionSets] = React.useState({});
+    const [feedback, setFeedback] = React.useState('// Begin directive.');
 
     const handleToggleExercise = (exerciseId) => {
         setExpandedExerciseId(currentId => (currentId === exerciseId ? null : exerciseId));
@@ -314,13 +314,13 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp }) => {
 // --- MAIN APP COMPONENT ---
 
 function App() {
-  const [operator, setOperator] = useState(initialOperatorData);
-  const [missions, setMissions] = useState(missionsData);
-  const [currentScreen, setCurrentScreen] = useState('board');
-  const [activeMission, setActiveMission] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [operator, setOperator] = React.useState(initialOperatorData);
+  const [missions, setMissions] = React.useState(missionsData);
+  const [currentScreen, setCurrentScreen] = React.useState('board');
+  const [activeMission, setActiveMission] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  useEffect(() => { setTimeout(() => setIsLoading(false), 1500); }, []);
+  React.useEffect(() => { setTimeout(() => setIsLoading(false), 1500); }, []);
 
   const handleNavigation = (screen) => { setCurrentScreen(screen); };
   
@@ -330,7 +330,7 @@ function App() {
     setCurrentScreen('logging');
   };
 
-  const handleUpdateXp = useCallback((xpGained) => {
+  const handleUpdateXp = React.useCallback((xpGained) => {
     setOperator(prev => {
         const newXp = prev.xp + xpGained;
         if (newXp >= prev.xpToNextLevel) {
@@ -346,7 +346,7 @@ function App() {
     });
   }, []);
 
-  const handleCompleteMission = useCallback((baseXp) => {
+  const handleCompleteMission = React.useCallback((baseXp) => {
     handleUpdateXp(baseXp);
     if (activeMission && activeMission.reward.includes('SCHEMATIC')) {
         const schematic = activeMission.reward.split('SCHEMATIC: ')[1];
