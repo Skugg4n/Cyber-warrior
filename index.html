@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" src="data.js"></script>
     <script type="text/babel">
     
 // --- MOCK DATA ---
@@ -27,77 +28,6 @@ const initialOperatorData = {
   inventory: [],
 };
 
-const missionsData = [
-  {
-    id: 'mission_push',
-    title: 'SYSTEM DIRECTIVE: PUSH PROTOCOL',
-    from: 'AEGIS_COMMAND',
-    description: '// Execute chest, shoulder, and triceps sub-routines. Focus on controlled power output.',
-    reward: '2500 DATA_PACKETS, SCHEMATIC: AEGIS_PAULDRONS_MKII',
-    xp: 2500,
-    exercises: [
-      { id: 'ex_dbp', name: 'Dumbbell Bench Press', targetSets: 3, targetReps: '20-30', previous: '12.5kg x 20-30 reps' },
-      { id: 'ex_dssp', name: 'Dumbbell Seated Shoulder Press', targetSets: 3, targetReps: '10-12', previous: '8-12.5kg x 10-12 reps' },
-      { id: 'ex_dbalr', name: 'Dumbbell Bent Arm Lateral Raise', targetSets: 3, targetReps: '15-20', previous: '8kg x 15-20 reps' },
-      { id: 'ex_dk', name: 'Dumbbell Kickback', targetSets: 4, targetReps: '10-15', previous: '8-12.5kg x 10-15 reps' },
-      { id: 'ex_dpu', name: 'Deep Push Up (hands on DBs)', targetSets: 3, targetReps: 'max', previous: 'Body-weight x max reps' },
-      { id: 'ex_bbp', name: 'Barbell Bench Press', targetSets: 3, targetReps: '8-10', previous: '50-55kg x 8-10 reps' },
-      { id: 'ex_kte', name: 'Kettlebell Triceps Extension', targetSets: 2, targetReps: '10-12', previous: '8-12kg x 10-12 reps' },
-    ],
-  },
-  {
-    id: 'mission_pull',
-    title: 'SYSTEM DIRECTIVE: PULL PROTOCOL',
-    from: 'AEGIS_COMMAND',
-    description: '// Execute back and biceps sub-routines. Focus on contractile force.',
-    reward: '2200 DATA_PACKETS, SCHEMATIC: MYOMER_CONDUITS_V2',
-    xp: 2200,
-    exercises: [
-        { id: 'ex_dir', name: 'Dumbbell Incline Row', targetSets: 3, targetReps: '15-20', previous: '12.5kg x 15-20 reps' },
-        { id: 'ex_bor', name: 'Bent Over Row', targetSets: 3, targetReps: '20-30', previous: '12.5kg x 20-30 reps' },
-        { id: 'ex_dashc', name: 'Dumbbell Alternate Seated Hammer Curl', targetSets: 4, targetReps: '15-20', previous: '12.5kg x 15-20 reps' },
-        { id: 'ex_ds', name: 'Dumbbell Shrug', targetSets: 3, targetReps: '30-40', previous: '12.5kg x 30-40 reps' },
-        { id: 'ex_bor_alt', name: 'Bent-Over Row (barbell / DB alt.)', targetSets: 3, targetReps: '20-25', previous: '12.5kg x 20-25 reps' },
-    ],
-  },
-  {
-    id: 'mission_legs_core',
-    title: 'SYSTEM DIRECTIVE: LEGS & CORE PROTOCOL',
-    from: 'AEGIS_COMMAND',
-    description: '// Full system diagnostic. Calibrate foundational and core stability systems.',
-    reward: '3000 DATA_PACKETS, SCHEMATIC: GYRO_STABILIZERS_MKIII',
-    xp: 3000,
-    exercises: [
-        { id: 'ex_fs', name: 'Full Squat (barbell)', targetSets: 3, targetReps: '8-10', previous: '50kg x 8-10 reps' },
-        { id: 'ex_dl', name: 'Deadlift (conventional)', targetSets: 3, targetReps: '15-16', previous: '50kg x 15-16 reps' },
-        { id: 'ex_brdl', name: 'Barbell Romanian Deadlift', targetSets: 3, targetReps: '12-15', previous: '50kg x 12-15 reps' },
-        { id: 'ex_gs', name: 'Goblet Squat (KB/DB)', targetSets: 3, targetReps: '15-20', previous: '12.5-16kg x 15-20 reps' },
-        { id: 'ex_dlu', name: 'Dumbbell Lunge', targetSets: 3, targetReps: '10-12', previous: '12.5kg x 10-12 reps' },
-        { id: 'ex_bscr', name: 'Barbell Standing Calf Raise', targetSets: 3, targetReps: '30-32', previous: '50kg x 30-32 reps' },
-        { id: 'ex_dgb', name: 'Dumbbell Glute Bridge', targetSets: 3, targetReps: '20', previous: '12.5-16kg x 20 reps' },
-        { id: 'ex_kbs', name: 'Kettlebell Swing', targetSets: 3, targetReps: '20', previous: '16kg x 20 reps' },
-        { id: 'ex_wr', name: 'Wheel Rollout', targetSets: 3, targetReps: '10-12', previous: 'Body-weight x 10-12 reps' },
-        { id: 'ex_wsltc', name: 'Weighted Straight Leg Toe Touch Crunch', targetSets: 3, targetReps: '20-30', previous: '12.5-16kg x 20-30 reps' },
-        { id: 'ex_hlr', name: 'Hanging Leg Raise', targetSets: 3, targetReps: '10', previous: 'Body-weight x 10 reps' },
-        { id: 'ex_lrhl', name: 'Leg Raise Hip Lift', targetSets: 3, targetReps: '10-15', previous: 'Body-weight x 10-15 reps' },
-        { id: 'ex_su', name: 'Sit-Up', targetSets: 3, targetReps: '30', previous: 'Body-weight x 30 reps' },
-        { id: 'ex_krt', name: 'Kettlebell Russian Twist', targetSets: 3, targetReps: '20', previous: '16kg x 20 reps' },
-        { id: 'ex_tt', name: 'Toe Touch (body-weight)', targetSets: 3, targetReps: '20', previous: 'Body-weight x 20 reps' },
-    ],
-  },
-    {
-    id: 'mission_cond',
-    title: 'SYSTEM DIRECTIVE: CONDITIONING & MOBILITY',
-    from: 'SYS_MAINTENANCE',
-    description: '// Run system optimization and defragmentation protocols.',
-    reward: '500 DATA_PACKETS',
-    xp: 500,
-    exercises: [
-        { id: 'ex_hb', name: 'Heavy Bag', targetSets: 1, targetReps: '10-15 min', previous: '10-15 min' },
-        { id: 'ex_ym', name: 'Yoga & Mobility', targetSets: 1, targetReps: '5-10 min', previous: '5-10 min flow' },
-    ],
-  }
-];
 
 // --- HELPER COMPONENTS ---
 
@@ -197,9 +127,6 @@ const OperatorProfile = ({ operator, onNav }) => (
     </div>
 );
 
-const marketItems = [
-    { id: 'item_gf', name: 'Glitch_Filter.pak', cost: 150, description: 'A single-use packet that purges one system fault.' }
-];
 
 const BlackMarket = ({ operator, onPurchase, onNav }) => (
     <div className="p-2 md:p-4">
@@ -451,7 +378,8 @@ function App() {
         setOperator(prev => ({ ...prev, augments: [...prev.augments, schematic] }));
     }
     if (flawless) {
-        handleUpdateCCreds(50);
+        const bonus = activeMission && activeMission.cCredBonus ? activeMission.cCredBonus : 50;
+        handleUpdateCCreds(bonus);
     }
     setActiveMission(null);
     setCurrentScreen('board');
