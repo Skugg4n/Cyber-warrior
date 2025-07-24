@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script type="text/babel" src="data.js"></script>
-    <script type="text/babel" src="DefragMinigame.js"></script>
+    <script type="text/babel" src="FirewallMinigame.js"></script>
     <script type="text/babel">
     
 // --- MOCK DATA ---
@@ -21,13 +21,16 @@
 const getInitialState = () => {
   const savedData = localStorage.getItem('aegis_operator_data');
   if (savedData) {
-    return JSON.parse(savedData);
+    const data = JSON.parse(savedData);
+    if (!data.xpMultiplier) data.xpMultiplier = 1;
+    return data;
   }
   return {
     id: `#${Math.random().toString(16).substr(2, 6).toUpperCase()}`,
     level: 1,
     xp: 0,
     xpToNextLevel: 1000,
+    xpMultiplier: 1,
     systemIntegrity: '100.0%',
     cCreds: 0,
     augments: ['Stock Chassis Mk I'],
@@ -283,7 +286,7 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp, onUpdateCCreds 
                             INITIATE //DEFRAG? [Y/N]
                         </button>
                     ) : (
-                        <DefragMinigame
+                        <FirewallMinigame
                             timeLeft={restTimeLeft}
                             onGameEnd={(finalScore) => {
                                 const cCredsAwarded = Math.floor(finalScore / 10);
@@ -354,16 +357,25 @@ function App() {
     setActiveMission(mission);
     setCurrentScreen('logging');
   };
-
   const handlePurchaseItem = React.useCallback((item) => {
-    if (operator.cCreds >= item.cost) {
+    if (operator.cCreds < item.cost) return;
+    if (item.id === "item_oc") {
+        setOperator(prev => ({ ...prev, cCreds: prev.cCreds - item.cost, xpMultiplier: 1.5 }));
+        alert("// Overclock.exe armed. Next directive will yield 1.5x XP.");
+    } else if (item.id === "item_gf") {
+        setOperator(prev => ({ ...prev, cCreds: prev.cCreds - item.cost, inventory: [...prev.inventory, item.id] }));
+        alert("// Glitch_Filter.pak acquired and stored in inventory.");
+    } else {
         setOperator(prev => ({ ...prev, cCreds: prev.cCreds - item.cost, inventory: [...prev.inventory, item.name] }));
     }
   }, [operator]);
 
+
+
   const handleUpdateXp = React.useCallback((xpGained) => {
     setOperator(prev => {
-        const newXp = prev.xp + xpGained;
+        const finalXp = Math.floor(xpGained * prev.xpMultiplier);
+        const newXp = prev.xp + finalXp;
         if (newXp >= prev.xpToNextLevel) {
             return {
                 ...prev,
@@ -375,7 +387,7 @@ function App() {
         }
         return { ...prev, xp: newXp };
     });
-  }, []);
+  }, [operator.xpMultiplier]);
 
   const handleUpdateCCreds = React.useCallback((c) => {
     setOperator(prev => ({ ...prev, cCreds: prev.cCreds + c }));
@@ -383,20 +395,21 @@ function App() {
 
   const handleCompleteMission = React.useCallback((baseXp, flawless) => {
     handleUpdateXp(baseXp);
-    if (activeMission && activeMission.reward.includes('SCHEMATIC')) {
-        const schematic = activeMission.reward.split('SCHEMATIC: ')[1];
+    if (activeMission && activeMission.reward.includes("SCHEMATIC")) {
+        const schematic = activeMission.reward.split("SCHEMATIC: ")[1];
         setOperator(prev => ({ ...prev, augments: [...prev.augments, schematic] }));
     }
     if (flawless) {
         const bonus = activeMission && activeMission.cCredBonus ? activeMission.cCredBonus : 50;
         handleUpdateCCreds(bonus);
     }
+    if (operator.xpMultiplier !== 1) {
+        setOperator(prev => ({ ...prev, xpMultiplier: 1 }));
+    }
     setActiveMission(null);
-    setCurrentScreen('board');
-  }, [activeMission, handleUpdateXp, handleUpdateCCreds]);
+    setCurrentScreen("board");
+  }, [activeMission, handleUpdateXp, handleUpdateCCreds, operator.xpMultiplier]);
 
-  const renderScreen = () => {
-    switch (currentScreen) {
       case 'profile': return <OperatorProfile operator={operator} onNav={handleNavigation} />;
       case 'logging': return <WorkoutLogger mission={activeMission} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} onUpdateCCreds={handleUpdateCCreds} />;
       case 'market': return <BlackMarket operator={operator} onPurchase={handlePurchaseItem} onNav={handleNavigation} />;
@@ -422,7 +435,7 @@ function App() {
                 {renderScreen()}
             </main>
             <footer className="border-t-2 border-green-500 p-1 text-center text-xs text-green-500">
-                <p>AEGIS PROTOCOL v1.1 - "Keystroke" | System Status: <span className="text-green-400">NOMINAL</span></p>
+                <p>AEGIS PROTOCOL v1.3 - "Firewall" | System Status: <span className="text-green-400">NOMINAL</span></p>
             </footer>
         </div>
     </div>
