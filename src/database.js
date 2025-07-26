@@ -12,6 +12,7 @@ window.initialOperatorData = {
   xpMultiplier: 1,
   systemIntegrity: '100.0%',
   cCreds: 0,
+  dataFragments: 0,
   augments: ['Stock Chassis Mk I'],
   inventory: [],
 };
