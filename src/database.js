@@ -3,7 +3,9 @@
 // This file contains all static data for missions, items, etc.
 // =================================================================
 
-export const initialOperatorData = {
+// Expose the data objects on the global window so they can be used
+// by inline Babel scripts without a module system.
+window.initialOperatorData = {
   level: 1,
   xp: 0,
   xpToNextLevel: 1000,
@@ -14,7 +16,7 @@ export const initialOperatorData = {
   inventory: [],
 };
 
-export const missionsData = [
+window.missionsData = [
   // ===================================
   // == STANDARD SYSTEM DIRECTIVES
   // ===================================
@@ -181,7 +183,7 @@ export const missionsData = [
   },
 ];
 
-export const marketItems = [
+window.marketItems = [
   { id: 'item_gf', name: 'Glitch_Filter.pak', cost: 150, description: '// A single-use data packet that purges one system integrity fault from your log. (Prevents one missed day from breaking a consistency streak).' },
   { id: 'item_oc', name: 'Overclock.exe', cost: 250, description: '// Temporarily overclocks your data port for one directive. Earn 1.5x DATA_PACKETS (XP) from all logged sets in your next session.' },
   { id: 'item_pa', name: 'Predictive_Analysis.scr', cost: 100, description: '// Before your next directive, this script will highlight one "critical sub-routine." Earn 2x C-Creds from any PERFORMANCE_BREAKTHROUGH on that specific exercise.' },
