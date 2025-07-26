@@ -24,7 +24,18 @@ const missionsData = [
       { id: 'ex_dbalr', name: 'Dumbbell Bent Arm Lateral Raise', type: 'weight_reps', targetSets: 3, targetReps: '15-20', previous: '8kg x 15-20 reps' },
       { id: 'ex_dk', name: 'Dumbbell Kickback', type: 'weight_reps', targetSets: 4, targetReps: '10-15', previous: '8-12.5kg x 10-15 reps' },
       { id: 'ex_dpu', name: 'Deep Push Up (hands on DBs)', type: 'reps_only', targetSets: 3, targetReps: 'max', previous: 'Body-weight x max reps' },
-      { id: 'ex_bbp', name: 'Barbell Bench Press', type: 'weight_reps', targetSets: 3, targetReps: '8-10', previous: '50-55kg x 8-10 reps' },
+      {
+        id: 'ex_bbp',
+        name: 'Barbell Bench Press',
+        type: 'weight_reps',
+        targetSets: 3,
+        targetReps: '8-10',
+        previous: '50-55kg x 8-10 reps',
+        alternatives: [
+          { id: 'ex_dbp', name: 'Dumbbell Bench Press', penalty: -5 },
+          { id: 'ex_dpu', name: 'Deep Push Up (hands on DBs)', penalty: -10 }
+        ]
+      },
       { id: 'ex_kte', name: 'Kettlebell Triceps Extension', type: 'weight_reps', targetSets: 2, targetReps: '10-12', previous: '8-12kg x 10-12 reps' },
     ],
   },
@@ -53,7 +64,18 @@ const missionsData = [
     xp: 3000,
     cCredBonus: 75,
     exercises: [
-      { id: 'ex_fs', name: 'Full Squat (barbell)', type: 'weight_reps', targetSets: 3, targetReps: '8-10', previous: '50kg x 8-10 reps' },
+      {
+        id: 'ex_fs',
+        name: 'Full Squat (barbell)',
+        type: 'weight_reps',
+        targetSets: 3,
+        targetReps: '8-10',
+        previous: '50kg x 8-10 reps',
+        alternatives: [
+          { id: 'ex_gs', name: 'Goblet Squat (KB/DB)', penalty: -5 },
+          { id: 'ex_bw_squat', name: 'Bodyweight Squat', penalty: -10 }
+        ]
+      },
       { id: 'ex_dl', name: 'Deadlift (conventional)', type: 'weight_reps', targetSets: 3, targetReps: '15-16', previous: '50kg x 15-16 reps' },
       { id: 'ex_brdl', name: 'Barbell Romanian Deadlift', type: 'weight_reps', targetSets: 3, targetReps: '12-15', previous: '50kg x 12-15 reps' },
       { id: 'ex_gs', name: 'Goblet Squat (KB/DB)', type: 'weight_reps', targetSets: 3, targetReps: '15-20', previous: '12.5-16kg x 15-20 reps' },

@@ -63,7 +63,7 @@ const Typewriter = ({ text, speed = 30 }) => {
 const BBSHeader = ({ operator, onNav }) => (
   <div className="border-2 border-green-500 p-2 font-mono text-green-400 bg-black">
     <div className="flex justify-between items-center border-b-2 border-green-500 pb-1 mb-1">
-      <h1 className="text-lg md:text-xl font-bold">[A.E.G.I.S] PROTOCOL v1.4</h1>
+      <h1 className="text-lg md:text-xl font-bold">[A.E.G.I.S] PROTOCOL v1.5</h1>
       <div className="text-xs text-right">
         <div>OPERATOR ID: {operator.id}</div>
         <div>SYS. INTEGRITY: {operator.systemIntegrity}</div>
@@ -499,7 +499,7 @@ function App() {
               <p><Typewriter text="CONNECTING TO [A.E.G.I.S] NODE 7..." /></p>
               <p><Typewriter text="ENCRYPTION HANDSHAKE... OK" /></p>
               <p><Typewriter text="BIOMETRIC SYNC... OK" /></p>
-              <p className="text-sm mt-2">AEGIS PROTOCOL v1.4</p>
+              <p className="text-sm mt-2">AEGIS PROTOCOL v1.5</p>
           </div>
       )
   }
@@ -512,7 +512,7 @@ function App() {
                 {renderScreen()}
             </main>
             <footer className="border-t-2 border-green-500 p-1 text-center text-xs text-green-500">
-                <p>AEGIS PROTOCOL v1.4 - "Firewall" | System Status: <span className="text-green-400">NOMINAL</span></p>
+                <p>AEGIS PROTOCOL v1.5 - "Firewall" | System Status: <span className="text-green-400">NOMINAL</span></p>
             </footer>
         </div>
     </div>
