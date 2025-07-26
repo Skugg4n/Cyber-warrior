@@ -264,7 +264,7 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
     );
 };
 
-const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpdateCCreds }) => {
+const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpdateCCreds, operator, onOperatorUpdate }) => {
     const [exercises, setExercises] = React.useState([...mission.exercises]);
     const [expandedExerciseId, setExpandedExerciseId] = React.useState(mission.exercises[0].id);
     const [sessionSets, setSessionSets] = React.useState({});
@@ -274,6 +274,20 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
     const [showDefrag, setShowDefrag] = React.useState(false);
 
     const [restTimeLeft, setRestTimeLeft] = React.useState(0);
+    const playBeep = () => {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(440, ctx.currentTime);
+            osc.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+        } catch (e) {}
+    };
+    const totalSets = React.useMemo(() => exercises.reduce((s, e) => s + e.targetSets, 0), [exercises]);
+    const loggedCount = Object.values(sessionSets).reduce((s, arr) => s + arr.length, 0);
+    const progress = Math.floor((loggedCount / totalSets) * 100);
     const handleToggleExercise = (exerciseId) => {
         setExpandedExerciseId(currentId => (currentId === exerciseId ? null : exerciseId));
     };
@@ -338,6 +352,18 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
         } else {
             setFeedback(`// LOGGED: ${reps}x${weight || 0}kg. +${xpGained} DATA PACKETS`);
         }
+        const roll = Math.random();
+        if (roll < 0.05) {
+            onUpdateCCreds(10);
+            setFeedback('// DATA SPIKE DETECTED! +10 C-Creds');
+        } else if (roll < 0.08) {
+            onOperatorUpdate(prev => ({ ...prev, dataFragments: (prev.dataFragments || 0) + 1 }));
+            const frag = (operator.dataFragments || 0) + 1;
+            setFeedback(`// ENCRYPTED DATA FRAGMENT FOUND [${frag}/3]`);
+        } else if (roll < 0.10) {
+            onOperatorUpdate(prev => ({ ...prev, xpMultiplier: 2 }));
+            setFeedback('// WARNING: POWER SURGE! Next set earns 2.0x DATA_PACKETS');
+        }
         setIsResting(true);
         setRestTimeLeft(90);
         setShowDefrag(false);
@@ -349,6 +375,9 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
     return (
         <div className="p-2 md:p-4">
             <h2 className="text-lg font-bold mb-1 text-red-500 animate-pulse">{'>'}! ACTIVE DIRECTIVE: {mission.title}</h2>
+            <div className="w-full bg-gray-800 border border-green-700 h-2 mb-2">
+                <div className="bg-green-500 h-full" style={{width: `${progress}%`}}></div>
+            </div>
             {feedback && <p className="text-green-400 text-sm h-4 mb-2">{feedback}</p>}
             {isResting && (
                 <div className="border-t-2 border-red-500 mt-4 pt-2">
@@ -558,7 +587,7 @@ function App() {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'profile': return <OperatorProfile operator={operator} onNav={handleNavigation} />;
-      case 'logging': return <WorkoutLogger mission={activeMission} history={workoutHistory} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} onUpdateCCreds={handleUpdateCCreds} />;
+      case 'logging': return <WorkoutLogger mission={activeMission} history={workoutHistory} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} onUpdateCCreds={handleUpdateCCreds} operator={operator} onOperatorUpdate={setOperator} />;
       case 'summary': return <DirectiveSummary data={summaryData} onContinue={() => setCurrentScreen('board')} />;
       case 'market': return <BlackMarket operator={operator} onPurchase={handlePurchaseItem} onNav={handleNavigation} />;
       default: return <MissionBoard missions={missions} onSelectMission={handleSelectMission} />;
