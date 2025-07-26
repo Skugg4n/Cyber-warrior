@@ -19,15 +19,21 @@
 // --- MOCK DATA ---
 // NEW: Replaced placeholder missions with your specific PUSH/PULL/LEGS routines.
 const getInitialState = () => {
-  const savedData = localStorage.getItem('aegis_operator_data');
+  const savedData = localStorage.getItem('aegis_app_data');
   if (savedData) {
     const data = JSON.parse(savedData);
-    if (!data.xpMultiplier) data.xpMultiplier = 1;
-    return data;
+    if (data.operator && !data.operator.xpMultiplier) data.operator.xpMultiplier = 1;
+    return {
+      operator: data.operator || { id: `#${Math.random().toString(16).substr(2,6).toUpperCase()}`, ...initialOperatorData },
+      history: data.history || []
+    };
   }
   return {
-    id: `#${Math.random().toString(16).substr(2, 6).toUpperCase()}`,
-    ...initialOperatorData,
+    operator: {
+      id: `#${Math.random().toString(16).substr(2, 6).toUpperCase()}`,
+      ...initialOperatorData,
+    },
+    history: []
   };
 };
 
@@ -155,16 +161,13 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
     const [reps, setReps] = React.useState('');
     const [weight, setWeight] = React.useState('');
 
-    React.useEffect(() => {
-        if (loggedSets.length > 0) {
-            const last = loggedSets[loggedSets.length - 1];
-            setWeight(last.weight);
-            setReps(last.reps);
-        } else {
-            setWeight('');
-            setReps('');
+    const loadPreviousData = () => {
+        const match = exercise.previous.match(/(\d+\.?\d*)kg.*?(\d+)/);
+        if (match) {
+            setWeight(match[1]);
+            setReps(match[2]);
         }
-    }, [loggedSets]);
+    };
 
     const handleLogSet = (e) => {
         e.preventDefault();
@@ -176,41 +179,56 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
     
     return (
         <div className="bg-black/70 p-1 mt-1">
-            <div className="grid grid-cols-4 gap-2 text-center text-xs text-green-400 mb-1">
-                <div>SET</div>
-                <div>PREVIOUS</div>
-                <div>WEIGHT</div>
-                <div>REPS</div>
-            </div>
-            {loggedSets.map((set, index) => (
-                 <div key={index} className="grid grid-cols-4 gap-2 text-center items-center text-xs mb-1">
-                    <div className="text-green-400">[SET {index + 1}]</div>
-                    <div className="text-gray-500">-</div>
-                    <div className="text-white">{set.weight || '-'} kg</div>
-                    <div className="text-white">{set.reps}</div>
-                </div>
-            ))}
-            <form onSubmit={handleLogSet} className="grid grid-cols-4 gap-2 text-center items-center">
-                <div className="text-green-400">[SET {loggedSets.length + 1}]</div>
-                <div className="text-xs text-gray-400">{exercise.previous}</div>
-                <input 
-                    type="number" 
-                    placeholder="KG" 
-                    value={weight}
-                    onChange={(e) => setWeight(e.target.value)}
-                    className="bg-gray-900 border border-green-500 text-white p-1 w-full text-center font-mono focus:outline-none focus:ring-1 focus:ring-green-500"
-                />
-                <input 
-                    type="number" 
-                    placeholder="REPS" 
-                    value={reps}
-                    onChange={(e) => setReps(e.target.value)}
-                    className="bg-gray-900 border border-green-500 text-white p-1 w-full text-center font-mono focus:outline-none focus:ring-1 focus:ring-green-500"
-                />
-                <button type="submit" className="col-span-4 mt-2 bg-green-600 text-black font-bold py-1 px-2 hover:bg-green-400 border border-green-400">
-                    LOG SET {loggedSets.length + 1}
-                </button>
-            </form>
+            <table className="w-full text-xs text-center">
+                <thead>
+                    <tr className="text-green-400">
+                        <th className="py-1 px-2">SET</th>
+                        <th className="py-1 px-2">PREVIOUS</th>
+                        <th className="py-1 px-2">WEIGHT</th>
+                        <th className="py-1 px-2">REPS</th>
+                        <th className="py-1 px-2"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loggedSets.map((set, index) => (
+                        <tr key={index} className="text-white">
+                            <td className="py-1 px-2">{index + 1}</td>
+                            <td className="py-1 px-2">{exercise.previous}</td>
+                            <td className="py-1 px-2">{set.weight || '-'}</td>
+                            <td className="py-1 px-2">{set.reps}</td>
+                            <td className="py-1 px-2 text-green-400 font-bold">[OK]</td>
+                        </tr>
+                    ))}
+                    <tr>
+                        <td className="py-1 px-2">{loggedSets.length + 1}</td>
+                        <td className="py-1 px-2 flex items-center justify-center space-x-1">
+                            <span>{exercise.previous}</span>
+                            <button type="button" onClick={loadPreviousData} className="border border-green-500 px-1 ml-1">[LOAD]</button>
+                        </td>
+                        <td className="py-1 px-2">
+                            <input
+                                type="number"
+                                placeholder="KG"
+                                value={weight}
+                                onChange={(e) => setWeight(e.target.value)}
+                                className="bg-gray-900 border border-green-500 text-white p-1 w-16 text-center font-mono focus:outline-none focus:ring-1 focus:ring-green-500"
+                            />
+                        </td>
+                        <td className="py-1 px-2">
+                            <input
+                                type="number"
+                                placeholder="REPS"
+                                value={reps}
+                                onChange={(e) => setReps(e.target.value)}
+                                className="bg-gray-900 border border-green-500 text-white p-1 w-16 text-center font-mono focus:outline-none focus:ring-1 focus:ring-green-500"
+                            />
+                        </td>
+                        <td className="py-1 px-2">
+                            <button type="button" onClick={handleLogSet} className="border border-green-500 px-1 text-green-400">[LOG]</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     );
 };
@@ -303,16 +321,16 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp, onUpdateCCreds 
                     )}
                 </div>
             )}
-            <div className="border border-red-500 p-2 bg-black/50 space-y-2">
+            <div className="border border-red-500 p-1 bg-black/50 space-y-1">
                 {mission.exercises.map(exercise => {
                     const loggedSets = sessionSets[exercise.id] || [];
                     const isComplete = loggedSets.length >= exercise.targetSets;
                     const isExpanded = expandedExerciseId === exercise.id;
                     return (
-                        <div key={exercise.id} className="border-b border-gray-700 pb-1">
+                        <div key={exercise.id} className="border-b border-gray-700 py-1 px-2">
                             <div className="flex justify-between items-center cursor-pointer" onClick={() => handleToggleExercise(exercise.id)}>
                                 <div>
-                                    <p className={`text-base ${isExpanded ? 'text-green-400' : 'text-white'}`}>{exercise.name}</p>
+                                    <p className={`text-base font-bold ${isExpanded ? 'text-green-400' : 'text-white'}`}>{exercise.name}</p>
                                     <p className="text-xs text-gray-400">TARGET: {exercise.targetSets} sets of {exercise.targetReps} reps</p>
                                 </div>
                                 <div className="text-right">
@@ -329,7 +347,7 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp, onUpdateCCreds 
             </div>
             <div className="mt-4">
                 <button
-                    onClick={() => onCompleteMission(mission.xp, allExercisesComplete)}
+                    onClick={() => onCompleteMission(mission.xp, allExercisesComplete, sessionSets)}
                     disabled={!allExercisesComplete}
                     className={`w-full font-bold py-2 px-3 border ${allExercisesComplete ? 'bg-red-600 text-white border-red-400 hover:bg-red-400 animate-pulse' : 'bg-gray-700 text-gray-500 border-gray-600 cursor-not-allowed'}`}
                 >
@@ -340,20 +358,39 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp, onUpdateCCreds 
     );
 };
 
+const DirectiveSummary = ({ data, onContinue }) => (
+    <div className="p-2 md:p-4">
+        <h2 className="text-lg font-bold mb-2 text-green-400">&gt; DIRECTIVE COMPLETE</h2>
+        <div className="border border-green-500 p-2 bg-black/50 text-xs space-y-1">
+            <p className="font-bold text-green-400">{data.mission.title}</p>
+            <p>TOTAL XP: {data.xp}</p>
+            {data.cCreds > 0 && <p>+{data.cCreds} C-Creds</p>}
+            <p>REWARD: {data.mission.reward}</p>
+        </div>
+        <button onClick={onContinue} className="mt-4 bg-green-600 text-black font-bold py-1 px-3 hover:bg-green-400 border border-green-400">
+            [CONTINUE TO //MSG_BOARD]
+        </button>
+    </div>
+);
+
 // --- MAIN APP COMPONENT ---
 
 function App() {
-  const [operator, setOperator] = React.useState(getInitialState());
+  const initialData = getInitialState();
+  const [operator, setOperator] = React.useState(initialData.operator);
+  const [workoutHistory, setWorkoutHistory] = React.useState(initialData.history);
   const [missions, setMissions] = React.useState(missionsData);
   const [currentScreen, setCurrentScreen] = React.useState('board');
   const [activeMission, setActiveMission] = React.useState(null);
+  const [summaryData, setSummaryData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => { setTimeout(() => setIsLoading(false), 1500); }, []);
 
   React.useEffect(() => {
-    localStorage.setItem("aegis_operator_data", JSON.stringify(operator));
-  }, [operator]);
+    const appData = { operator, history: workoutHistory };
+    localStorage.setItem('aegis_app_data', JSON.stringify(appData));
+  }, [operator, workoutHistory]);
   const handleNavigation = (screen) => { setCurrentScreen(screen); };
   
   const handleSelectMission = (missionId) => {
@@ -397,7 +434,7 @@ function App() {
     setOperator(prev => ({ ...prev, cCreds: prev.cCreds + c }));
   }, []);
 
-  const handleCompleteMission = React.useCallback((baseXp, flawless) => {
+  const handleCompleteMission = React.useCallback((baseXp, flawless, sessionData) => {
     handleUpdateXp(baseXp);
     if (activeMission && activeMission.reward.includes("SCHEMATIC")) {
         const schematic = activeMission.reward.split("SCHEMATIC: ")[1];
@@ -410,14 +447,18 @@ function App() {
     if (operator.xpMultiplier !== 1) {
         setOperator(prev => ({ ...prev, xpMultiplier: 1 }));
     }
+    const summary = { mission: activeMission, xp: baseXp, cCreds: flawless ? (activeMission && activeMission.cCredBonus ? activeMission.cCredBonus : 50) : 0 };
+    setWorkoutHistory(prev => [...prev, { missionId: activeMission.id, sets: sessionData, timestamp: Date.now() }]);
+    setSummaryData(summary);
     setActiveMission(null);
-    setCurrentScreen("board");
+    setCurrentScreen('summary');
   }, [activeMission, handleUpdateXp, handleUpdateCCreds, operator.xpMultiplier]);
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'profile': return <OperatorProfile operator={operator} onNav={handleNavigation} />;
       case 'logging': return <WorkoutLogger mission={activeMission} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} onUpdateCCreds={handleUpdateCCreds} />;
+      case 'summary': return <DirectiveSummary data={summaryData} onContinue={() => setCurrentScreen('board')} />;
       case 'market': return <BlackMarket operator={operator} onPurchase={handlePurchaseItem} onNav={handleNavigation} />;
       default: return <MissionBoard missions={missions} onSelectMission={handleSelectMission} />;
     }
