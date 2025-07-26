@@ -12,8 +12,8 @@
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script type="text/babel" src="data.js"></script>
-    <script type="text/babel" src="FirewallMinigame.js"></script>
+    <script type="text/babel" src="src/database.js"></script>
+    <script type="text/babel" src="src/minigames/DefragMinigame.js"></script>
     <script type="text/babel">
     
 // --- MOCK DATA ---
@@ -27,14 +27,7 @@ const getInitialState = () => {
   }
   return {
     id: `#${Math.random().toString(16).substr(2, 6).toUpperCase()}`,
-    level: 1,
-    xp: 0,
-    xpToNextLevel: 1000,
-    xpMultiplier: 1,
-    systemIntegrity: '100.0%',
-    cCreds: 0,
-    augments: ['Stock Chassis Mk I'],
-    inventory: [],
+    ...initialOperatorData,
   };
 };
 
@@ -162,6 +155,17 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
     const [reps, setReps] = React.useState('');
     const [weight, setWeight] = React.useState('');
 
+    React.useEffect(() => {
+        if (loggedSets.length > 0) {
+            const last = loggedSets[loggedSets.length - 1];
+            setWeight(last.weight);
+            setReps(last.reps);
+        } else {
+            setWeight('');
+            setReps('');
+        }
+    }, [loggedSets]);
+
     const handleLogSet = (e) => {
         e.preventDefault();
         onLogSet(exercise.id, reps, weight);
@@ -171,7 +175,7 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
     };
     
     return (
-        <div className="bg-black/70 p-2 mt-1">
+        <div className="bg-black/70 p-1 mt-1">
             <div className="grid grid-cols-4 gap-2 text-center text-xs text-green-400 mb-1">
                 <div>SET</div>
                 <div>PREVIOUS</div>
@@ -179,7 +183,7 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
                 <div>REPS</div>
             </div>
             {loggedSets.map((set, index) => (
-                 <div key={index} className="grid grid-cols-4 gap-2 text-center items-center text-sm mb-1">
+                 <div key={index} className="grid grid-cols-4 gap-2 text-center items-center text-xs mb-1">
                     <div className="text-green-400">[SET {index + 1}]</div>
                     <div className="text-gray-500">-</div>
                     <div className="text-white">{set.weight || '-'} kg</div>
@@ -286,7 +290,7 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp, onUpdateCCreds 
                             INITIATE //DEFRAG? [Y/N]
                         </button>
                     ) : (
-                        <FirewallMinigame
+                        <DefragMinigame
                             timeLeft={restTimeLeft}
                             onGameEnd={(finalScore) => {
                                 const cCredsAwarded = Math.floor(finalScore / 10);
@@ -305,10 +309,10 @@ const WorkoutLogger = ({ mission, onCompleteMission, onUpdateXp, onUpdateCCreds 
                     const isComplete = loggedSets.length >= exercise.targetSets;
                     const isExpanded = expandedExerciseId === exercise.id;
                     return (
-                        <div key={exercise.id} className="border-b border-gray-700 pb-2">
+                        <div key={exercise.id} className="border-b border-gray-700 pb-1">
                             <div className="flex justify-between items-center cursor-pointer" onClick={() => handleToggleExercise(exercise.id)}>
                                 <div>
-                                    <p className={`text-lg ${isExpanded ? 'text-green-400' : 'text-white'}`}>{exercise.name}</p>
+                                    <p className={`text-base ${isExpanded ? 'text-green-400' : 'text-white'}`}>{exercise.name}</p>
                                     <p className="text-xs text-gray-400">TARGET: {exercise.targetSets} sets of {exercise.targetReps} reps</p>
                                 </div>
                                 <div className="text-right">
