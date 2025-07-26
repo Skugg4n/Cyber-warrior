@@ -1,4 +1,9 @@
-const initialOperatorData = {
+// =================================================================
+// AEGIS PROTOCOL - CONTENT DATABASE v1.5
+// This file contains all static data for missions, items, etc.
+// =================================================================
+
+export const initialOperatorData = {
   level: 1,
   xp: 0,
   xpToNextLevel: 1000,
@@ -9,7 +14,10 @@ const initialOperatorData = {
   inventory: [],
 };
 
-const missionsData = [
+export const missionsData = [
+  // ===================================
+  // == STANDARD SYSTEM DIRECTIVES
+  // ===================================
   {
     id: 'mission_push_v1',
     title: 'SYSTEM DIRECTIVE: PUSH PROTOCOL',
@@ -24,18 +32,7 @@ const missionsData = [
       { id: 'ex_dbalr', name: 'Dumbbell Bent Arm Lateral Raise', type: 'weight_reps', targetSets: 3, targetReps: '15-20', previous: '8kg x 15-20 reps' },
       { id: 'ex_dk', name: 'Dumbbell Kickback', type: 'weight_reps', targetSets: 4, targetReps: '10-15', previous: '8-12.5kg x 10-15 reps' },
       { id: 'ex_dpu', name: 'Deep Push Up (hands on DBs)', type: 'reps_only', targetSets: 3, targetReps: 'max', previous: 'Body-weight x max reps' },
-      {
-        id: 'ex_bbp',
-        name: 'Barbell Bench Press',
-        type: 'weight_reps',
-        targetSets: 3,
-        targetReps: '8-10',
-        previous: '50-55kg x 8-10 reps',
-        alternatives: [
-          { id: 'ex_dbp', name: 'Dumbbell Bench Press', penalty: -5 },
-          { id: 'ex_dpu', name: 'Deep Push Up (hands on DBs)', penalty: -10 }
-        ]
-      },
+      { id: 'ex_bbp', name: 'Barbell Bench Press', type: 'weight_reps', targetSets: 3, targetReps: '8-10', previous: '50-55kg x 8-10 reps', alternatives: [{ id: 'ex_dbp', name: 'Dumbbell Bench Press', penalty: -5 }, { id: 'ex_dpu', name: 'Deep Push Up (hands on DBs)', penalty: -10 }] },
       { id: 'ex_kte', name: 'Kettlebell Triceps Extension', type: 'weight_reps', targetSets: 2, targetReps: '10-12', previous: '8-12kg x 10-12 reps' },
     ],
   },
@@ -64,18 +61,7 @@ const missionsData = [
     xp: 3000,
     cCredBonus: 75,
     exercises: [
-      {
-        id: 'ex_fs',
-        name: 'Full Squat (barbell)',
-        type: 'weight_reps',
-        targetSets: 3,
-        targetReps: '8-10',
-        previous: '50kg x 8-10 reps',
-        alternatives: [
-          { id: 'ex_gs', name: 'Goblet Squat (KB/DB)', penalty: -5 },
-          { id: 'ex_bw_squat', name: 'Bodyweight Squat', penalty: -10 }
-        ]
-      },
+      { id: 'ex_fs', name: 'Full Squat (barbell)', type: 'weight_reps', targetSets: 3, targetReps: '8-10', previous: '50kg x 8-10 reps', alternatives: [{ id: 'ex_gs', name: 'Goblet Squat (KB/DB)', penalty: -5 }, { id: 'ex_bw_squat', name: 'Bodyweight Squat', penalty: -10 }] },
       { id: 'ex_dl', name: 'Deadlift (conventional)', type: 'weight_reps', targetSets: 3, targetReps: '15-16', previous: '50kg x 15-16 reps' },
       { id: 'ex_brdl', name: 'Barbell Romanian Deadlift', type: 'weight_reps', targetSets: 3, targetReps: '12-15', previous: '50kg x 12-15 reps' },
       { id: 'ex_gs', name: 'Goblet Squat (KB/DB)', type: 'weight_reps', targetSets: 3, targetReps: '15-20', previous: '12.5-16kg x 15-20 reps' },
@@ -105,6 +91,64 @@ const missionsData = [
       { id: 'ex_ym', name: 'Yoga & Mobility', type: 'timed', targetSets: 1, targetReps: '5-10 min', previous: '5-10 min flow' },
     ],
   },
+
+  // ===================================
+  // == MICRO-DIRECTIVES (NEW)
+  // ===================================
+  {
+    id: 'micro_core_01',
+    title: 'MICRO-DIRECTIVE: CORE BURN',
+    from: 'SYS_MAINTENANCE',
+    description: '// Quick core system calibration. Estimated time: 10 minutes.',
+    reward: '400 DATA_PACKETS',
+    xp: 400,
+    cCredBonus: 15,
+    exercises: [
+      { id: 'ex_wr', name: 'Wheel Rollout', type: 'reps_only', targetSets: 3, targetReps: '10-12', previous: 'Body-weight x 10-12 reps' },
+      { id: 'ex_krt', name: 'Kettlebell Russian Twist', type: 'weight_reps', targetSets: 3, targetReps: '20', previous: '16kg x 20 reps' }
+    ]
+  },
+  {
+    id: 'micro_arms_01',
+    title: 'MICRO-DIRECTIVE: ARM PUMP',
+    from: 'SYS_MAINTENANCE',
+    description: '// Focused sub-routines for biceps and triceps. Estimated time: 12 minutes.',
+    reward: '450 DATA_PACKETS',
+    xp: 450,
+    cCredBonus: 20,
+    exercises: [
+      { id: 'ex_dashc', name: 'Dumbbell Alternate Seated Hammer Curl', type: 'weight_reps', targetSets: 3, targetReps: '15-20', previous: '12.5kg x 15-20 reps' },
+      { id: 'ex_dk', name: 'Dumbbell Kickback', type: 'weight_reps', targetSets: 3, targetReps: '10-15', previous: '8-12.5kg x 10-15 reps' },
+    ]
+  },
+  {
+    id: 'micro_shoulders_01',
+    title: 'MICRO-DIRECTIVE: SHOULDER CALIBRATION',
+    from: 'SYS_MAINTENANCE',
+    description: '// Isolate and calibrate deltoid actuators. Estimated time: 8 minutes.',
+    reward: '350 DATA_PACKETS',
+    xp: 350,
+    cCredBonus: 15,
+    exercises: [
+      { id: 'ex_dssp', name: 'Dumbbell Seated Shoulder Press', type: 'weight_reps', targetSets: 3, targetReps: '10-12', previous: '8-12.5kg x 10-12 reps' },
+    ]
+  },
+  {
+    id: 'micro_mobility_01',
+    title: 'MICRO-DIRECTIVE: SYSTEM DEFRAG',
+    from: 'SYS_MAINTENANCE',
+    description: '// A quick mobility and stretching protocol to improve system flexibility. Estimated time: 5 minutes.',
+    reward: '100 DATA_PACKETS',
+    xp: 100,
+    cCredBonus: 10,
+    exercises: [
+      { id: 'ex_ym_short', name: 'Targeted Mobility Flow', type: 'timed', targetSets: 1, targetReps: '5 min', previous: '5 min flow' },
+    ]
+  },
+
+  // ===================================
+  // == EVENT DIRECTIVES
+  // ===================================
   {
     id: 'event_glitch_01',
     title: '[GLITCHED] D@T$_H&D R3C0VRY',
@@ -118,8 +162,6 @@ const missionsData = [
       { id: 'ex_dir', name: 'Dumbbell Incline Row', type: 'weight_reps', targetSets: 5, targetReps: '15-20', previous: '12.5kg x 15-20 reps' },
       { id: 'ex_bor', name: 'Bent Over Row', type: 'weight_reps', targetSets: 5, targetReps: '20-30', previous: '12.5kg x 20-30 reps' },
       { id: 'ex_dashc', name: 'Dumbbell Alternate Seated Hammer Curl', type: 'weight_reps', targetSets: 5, targetReps: '15-20', previous: '12.5kg x 15-20 reps' },
-      { id: 'ex_ds', name: 'Dumbbell Shrug', type: 'weight_reps', targetSets: 5, targetReps: '30-40', previous: '12.5kg x 30-40 reps' },
-      { id: 'ex_bor_alt', name: 'Bent-Over Row (barbell / DB alt.)', type: 'weight_reps', targetSets: 5, targetReps: '20-25', previous: '12.5kg x 20-25 reps' },
     ],
   },
   {
@@ -132,30 +174,14 @@ const missionsData = [
     xp: 5000,
     cCredBonus: 200,
     exercises: [
-      { id: 'ex_dbp', name: 'Dumbbell Bench Press', type: 'weight_reps', targetSets: 3, targetReps: '20-30', previous: '12.5kg x 20-30 reps' },
       { id: 'ex_bbp', name: 'Barbell Bench Press', type: 'weight_reps', targetSets: 3, targetReps: '8-10', previous: '50-55kg x 8-10 reps' },
-      { id: 'ex_dir', name: 'Dumbbell Incline Row', type: 'weight_reps', targetSets: 3, targetReps: '15-20', previous: '12.5kg x 15-20 reps' },
       { id: 'ex_bor', name: 'Bent Over Row', type: 'weight_reps', targetSets: 3, targetReps: '20-30', previous: '12.5kg x 20-30 reps' },
-    ],
-  },
-  {
-    id: 'event_lore_01',
-    title: 'ARCHIVE DIVE: The First Operator',
-    from: 'THE_LIBRARIAN',
-    description: '// Fragments of an old log file have surfaced. They appear to belong to Operator #000001. Executing the original diagnostic routine may unlock the rest of the file. [REDACTED]',
-    specialCondition: 'Unlock [REDACTED] with a DECRYPTION_KEY to reveal a piece of lore about the AEGIS system\'s origin.',
-    reward: '1500 DATA_PACKETS',
-    xp: 1500,
-    cCredBonus: 50,
-    exercises: [
-      { id: 'ex_pushups', name: 'Push-ups', type: 'reps_only', targetSets: 3, targetReps: '15-20', previous: 'Body-weight x 15-20 reps' },
-      { id: 'ex_bw_squat', name: 'Bodyweight Squat', type: 'reps_only', targetSets: 3, targetReps: '20-25', previous: 'Body-weight x 20-25 reps' },
-      { id: 'ex_plank', name: 'Plank', type: 'timed', targetSets: 3, targetReps: '30s', previous: '30s hold' },
+      { id: 'ex_fs', name: 'Full Squat (barbell)', type: 'weight_reps', targetSets: 3, targetReps: '8-10', previous: '50kg x 8-10 reps' },
     ],
   },
 ];
 
-const marketItems = [
+export const marketItems = [
   { id: 'item_gf', name: 'Glitch_Filter.pak', cost: 150, description: '// A single-use data packet that purges one system integrity fault from your log. (Prevents one missed day from breaking a consistency streak).' },
   { id: 'item_oc', name: 'Overclock.exe', cost: 250, description: '// Temporarily overclocks your data port for one directive. Earn 1.5x DATA_PACKETS (XP) from all logged sets in your next session.' },
   { id: 'item_pa', name: 'Predictive_Analysis.scr', cost: 100, description: '// Before your next directive, this script will highlight one "critical sub-routine." Earn 2x C-Creds from any PERFORMANCE_BREAKTHROUGH on that specific exercise.' },
@@ -164,7 +190,3 @@ const marketItems = [
   { id: 'schematic_chassis_amber', name: 'CHASSIS_CHROMA_PACK [VINTAGE]', cost: 500, description: '// Unlocks a new color theme for the AEGIS interface, using the amber monochrome of early network systems.' },
   { id: 'schematic_tag_corrupt', name: 'CORRUPTED_HOLOTAG', cost: 1000, description: '// A glitched, unstable holotag for your Operator Profile, rendered in flickering ASCII.' },
 ];
-
-window.initialOperatorData = initialOperatorData;
-window.missionsData = missionsData;
-window.marketItems = marketItems;
