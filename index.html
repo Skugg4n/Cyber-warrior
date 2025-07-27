@@ -24,6 +24,7 @@
 // NEW: Replaced placeholder missions with your specific PUSH/PULL/LEGS routines.
 const getInitialState = () => {
   const savedData = localStorage.getItem('aegis_app_data');
+  const awakenedFlag = localStorage.getItem('hasAwakened') === 'true';
   if (savedData) {
     const data = JSON.parse(savedData);
     if (data.operator && !data.operator.xpMultiplier) data.operator.xpMultiplier = 1;
@@ -31,7 +32,7 @@ const getInitialState = () => {
       operator: data.operator || { id: `#${Math.random().toString(16).substr(2,6).toUpperCase()}`, ...initialOperatorData },
       history: data.history || [],
       resonance: data.resonance || 0,
-      awakened: data.awakened || false,
+      awakened: typeof data.awakened === 'boolean' ? data.awakened : awakenedFlag,
     };
   }
   return {
@@ -41,7 +42,7 @@ const getInitialState = () => {
     },
     history: [],
     resonance: 0,
-    awakened: false,
+    awakened: awakenedFlag,
   };
 };
 
