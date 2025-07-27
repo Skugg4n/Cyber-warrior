@@ -12,6 +12,7 @@
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" src="sleeper-database.js"></script>
 
   <script type="text/babel">
     // --- Icons ---
@@ -41,16 +42,7 @@
       </svg>
     );
 
-    const mockRoutines = [
-      { id: 'r1', name: 'Primary Push Routine', exercises: [
-          { id: 'ex_dbp', name: 'Dumbbell Bench Press', targetSets: 3, previous: ['12.5kg x 22', '12.5kg x 20', '12.5kg x 18'] },
-          { id: 'ex_dssp', name: 'Dumbbell Seated Shoulder Press', targetSets: 3, previous: ['10kg x 12', '10kg x 11', '10kg x 10'] }
-        ] },
-      { id: 'r2', name: 'Core & Conditioning', exercises: [
-          { id: 'ex_plank', name: 'Plank', type: 'timed', targetSets: 3, previous: ['60s', '50s', '45s'] }
-        ] },
-      { id: 'r3', name: 'Full Body Test', exercises: [] },
-    ];
+    const routines = window.sleeperRoutines;
 
     // persistence helpers
     const STORAGE_KEY = 'sleeper_app_data';
@@ -191,9 +183,9 @@
         <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
         <p className="text-gray-400 mb-6">Your next scheduled workout is ready.</p>
         <div className="bg-gray-800 rounded-lg p-4">
-          <h2 className="font-bold text-lg mb-2">{mockRoutines[0].name}</h2>
-          <p className="text-sm text-gray-400 mb-4">{mockRoutines[0].exercises.length} exercises</p>
-          <button onClick={() => onStart(mockRoutines[0])} className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg">Start Workout</button>
+          <h2 className="font-bold text-lg mb-2">{routines[0].name}</h2>
+          <p className="text-sm text-gray-400 mb-4">{routines[0].exercises.length} exercises</p>
+          <button onClick={() => onStart(routines[0])} className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg">Start Workout</button>
         </div>
       </div>
     );
@@ -202,7 +194,7 @@
       <div className="p-4 text-white">
         <h1 className="text-3xl font-bold mb-6">My Routines</h1>
         <div className="space-y-3">
-          {mockRoutines.map(rt => (
+          {routines.map(rt => (
             <div key={rt.id} className="bg-gray-800 rounded-lg p-4 flex justify-between items-center">
               <div>
                 <h2 className="font-bold text-lg">{rt.name}</h2>
