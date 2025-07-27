@@ -15,6 +15,8 @@
     <script type="text/babel" src="src/database.js"></script>
     <script type="text/babel" src="src/minigames/DefragMinigame.js"></script>
     <script type="text/babel" src="src/ExerciseHistory.js"></script>
+    <script type="text/babel" src="systems/LevelingSystem.js"></script>
+    <script type="text/babel" src="systems/RewardSystem.js"></script>
     <script type="text/babel">
     
 // --- MOCK DATA ---
@@ -26,7 +28,10 @@ const getInitialState = () => {
     if (data.operator && !data.operator.xpMultiplier) data.operator.xpMultiplier = 1;
     return {
       operator: data.operator || { id: `#${Math.random().toString(16).substr(2,6).toUpperCase()}`, ...initialOperatorData },
-      history: data.history || []
+      history: data.history || [],
+      resonance: data.resonance || 0,
+      theme: data.theme || 'sleeper',
+      awakened: data.awakened || false,
     };
   }
   return {
@@ -34,10 +39,14 @@ const getInitialState = () => {
       id: `#${Math.random().toString(16).substr(2, 6).toUpperCase()}`,
       ...initialOperatorData,
     },
-    history: []
+    history: [],
+    resonance: 0,
+    theme: 'sleeper',
+    awakened: false,
   };
 };
 
+const ThemeContext = React.createContext({ theme: 'sleeper', setTheme: () => {} });
 
 // --- HELPER COMPONENTS ---
 
@@ -61,7 +70,7 @@ const Typewriter = ({ text, speed = 30 }) => {
 
 // --- MAIN UI COMPONENTS ---
 
-const BBSHeader = ({ operator, onNav }) => (
+const BBSHeader = ({ operator, onNav, resonance, awakened }) => (
   <div className="border-2 border-green-500 p-2 font-mono text-green-400 bg-black">
     <div className="flex justify-between items-center border-b-2 border-green-500 pb-1 mb-1">
       <h1 className="text-lg md:text-xl font-bold">[A.E.G.I.S] PROTOCOL v1.5</h1>
@@ -77,6 +86,11 @@ const BBSHeader = ({ operator, onNav }) => (
         <button onClick={() => onNav('market')} className="hover:bg-green-500 hover:text-black p-1">[3] //BLACK_MARKET</button>
         <button className="text-gray-600 p-1 cursor-not-allowed">[4] LOGOUT</button>
     </div>
+    {!awakened && (
+      <div className="mt-1 w-full bg-gray-700 h-1">
+        <div className="bg-blue-500 h-full" style={{width:`${resonance}%`}}></div>
+      </div>
+    )}
   </div>
 );
 
@@ -332,7 +346,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
         let newSet = { reps: parseInt(reps), weight: weight ? parseInt(weight) : 0, breakthrough: false };
         const currentSets = sessionSets[exerciseId] || [];
         setSessionSets({ ...sessionSets, [exerciseId]: [...currentSets, newSet] });
-        const xpGained = Math.floor(newSet.reps * (newSet.weight || 1) * 0.5);
+        const xpGained = LevelingSystem.calculateXpForSet(newSet);
         onUpdateXp(xpGained);
 
         const exercise = exercises.find(e => e.id === exerciseId);
@@ -352,18 +366,23 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
         } else {
             setFeedback(`// LOGGED: ${reps}x${weight || 0}kg. +${xpGained} DATA PACKETS`);
         }
-        const roll = Math.random();
-        if (roll < 0.05) {
-            onUpdateCCreds(10);
-            setFeedback('// DATA SPIKE DETECTED! +10 C-Creds');
-        } else if (roll < 0.08) {
+        const { updated, message } = RewardSystem.rollDataSpike(operator);
+        if (message) {
+            onOperatorUpdate(() => updated);
+            setFeedback(message);
+        } else if (Math.random() < 0.03) {
             onOperatorUpdate(prev => ({ ...prev, dataFragments: (prev.dataFragments || 0) + 1 }));
             const frag = (operator.dataFragments || 0) + 1;
             setFeedback(`// ENCRYPTED DATA FRAGMENT FOUND [${frag}/3]`);
-        } else if (roll < 0.10) {
+        } else if (Math.random() < 0.02) {
             onOperatorUpdate(prev => ({ ...prev, xpMultiplier: 2 }));
             setFeedback('// WARNING: POWER SURGE! Next set earns 2.0x DATA_PACKETS');
         }
+        setResonance(prev => {
+            const val = Math.min(100, prev + 1);
+            if (val === 100 && !awakened) triggerAwakening();
+            return val;
+        });
         setIsResting(true);
         setRestTimeLeft(90);
         setShowDefrag(false);
@@ -491,19 +510,23 @@ function App() {
   const initialData = getInitialState();
   const [operator, setOperator] = React.useState(initialData.operator);
   const [workoutHistory, setWorkoutHistory] = React.useState(initialData.history);
+  const [resonance, setResonance] = React.useState(initialData.resonance);
+  const [theme, setTheme] = React.useState(initialData.theme);
+  const [awakened, setAwakened] = React.useState(initialData.awakened);
   const [missions, setMissions] = React.useState(missionsData);
   const [currentScreen, setCurrentScreen] = React.useState('board');
   const [activeMission, setActiveMission] = React.useState(null);
   const [summaryData, setSummaryData] = React.useState(null);
   const [missionStartTime, setMissionStartTime] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [showAwakening, setShowAwakening] = React.useState(false);
 
   React.useEffect(() => { setTimeout(() => setIsLoading(false), 1500); }, []);
 
   React.useEffect(() => {
-    const appData = { operator, history: workoutHistory };
+    const appData = { operator, history: workoutHistory, resonance, theme, awakened };
     localStorage.setItem('aegis_app_data', JSON.stringify(appData));
-  }, [operator, workoutHistory]);
+  }, [operator, workoutHistory, resonance, theme, awakened]);
   const handleNavigation = (screen) => { setCurrentScreen(screen); };
   
   const handleSelectMission = (missionId) => {
@@ -530,22 +553,23 @@ function App() {
   const handleUpdateXp = React.useCallback((xpGained) => {
     setOperator(prev => {
         const finalXp = Math.floor(xpGained * prev.xpMultiplier);
-        const newXp = prev.xp + finalXp;
-        if (newXp >= prev.xpToNextLevel) {
-            return {
-                ...prev,
-                level: prev.level + 1,
-                xp: newXp - prev.xpToNextLevel,
-                xpToNextLevel: Math.floor(prev.xpToNextLevel * 1.5),
-                augments: [...prev.augments, `System Upgrade v${prev.level + 1}`]
-            };
-        }
-        return { ...prev, xp: newXp };
+        const updated = { ...prev, xp: prev.xp + finalXp };
+        return LevelingSystem.checkForLevelUp(updated);
     });
   }, [operator.xpMultiplier]);
 
   const handleUpdateCCreds = React.useCallback((c) => {
     setOperator(prev => ({ ...prev, cCreds: prev.cCreds + c }));
+  }, []);
+
+  const triggerAwakening = React.useCallback(() => {
+    setShowAwakening(true);
+    setTimeout(() => {
+      setTheme('aegis');
+      setAwakened(true);
+      setShowAwakening(false);
+      setCurrentScreen('board');
+    }, 4000);
   }, []);
 
   const handleCompleteMission = React.useCallback((baseXp, flawless, sessionData) => {
@@ -555,8 +579,7 @@ function App() {
         setOperator(prev => ({ ...prev, augments: [...prev.augments, schematic] }));
     }
     if (flawless) {
-        const bonus = activeMission && activeMission.cCredBonus ? activeMission.cCredBonus : 50;
-        handleUpdateCCreds(bonus);
+        setOperator(prev => RewardSystem.awardFlawlessExecution(prev, activeMission));
     }
     if (operator.xpMultiplier !== 1) {
         setOperator(prev => ({ ...prev, xpMultiplier: 1 }));
@@ -606,9 +629,10 @@ function App() {
   }
 
   return (
-    <div className="bg-black text-green-400 min-h-screen font-mono p-2 sm:p-4">
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <div className={`min-h-screen p-2 sm:p-4 ${theme === 'aegis' ? 'bg-black text-green-400 font-mono' : 'bg-gray-900 text-blue-200 font-sans'}` }>
         <div className="max-w-4xl mx-auto bg-black/50 border-4 border-green-500">
-            <BBSHeader operator={operator} onNav={handleNavigation} />
+            <BBSHeader operator={operator} onNav={handleNavigation} resonance={resonance} awakened={awakened} />
             <main className="p-2">
                 {renderScreen()}
             </main>
@@ -616,7 +640,17 @@ function App() {
                 <p>AEGIS PROTOCOL v1.5 - "Firewall" | System Status: <span className="text-green-400">NOMINAL</span></p>
             </footer>
         </div>
+        {showAwakening && (
+          <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-green-500 font-mono text-lg space-y-1 z-20">
+            <p><Typewriter text="// POWER THRESHOLD REACHED..." /></p>
+            <p><Typewriter text="// SYSTEM KERNEL BOOTING..." /></p>
+            <p><Typewriter text="// MEMORY FRAGMENT RESTORED..." /></p>
+            <p><Typewriter text="// AEGIS MAINFRAME ONLINE." /></p>
+            <p><Typewriter text="// WELCOME BACK." /></p>
+          </div>
+        )}
     </div>
+    </ThemeContext.Provider>
   );
 }
 
