@@ -1,4 +1,5 @@
-export const mockDirective = {
+// Mock data used by the Apex demo. Expose on window so scripts can access
+window.mockDirective = {
   title: 'SYSTEM DIRECTIVE: PUSH PROTOCOL',
   exercises: [
     { id: 'ex_dbp', name: 'Dumbbell Bench Press', type: 'weight_reps', targetSets: 3, previous: ['12.5kg x 22', '12.5kg x 20', '12.5kg x 18'], modifier: 'x2' },
@@ -8,7 +9,7 @@ export const mockDirective = {
   ],
 };
 
-export const mockSessionStats = {
+window.mockSessionStats = {
   time: '00:15:32',
   volume: '4500kg',
   cCreds: 15,
