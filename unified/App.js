@@ -87,7 +87,13 @@ const SleeperApp = ({ onStartAwakening }) => {
   const renderContent = () => {
     if (activeScreen === 'logger' && activeRoutine) {
       const directive = { title: activeRoutine.name, exercises: activeRoutine.exercises };
-      return <WorkoutLoggerApex directive={directive} stats={{ time: 0, volume: 0, cCreds: 0 }} />;
+      return (
+        <WorkoutLoggerApex
+          directive={directive}
+          stats={{ time: 0, volume: 0, cCreds: 0 }}
+          onHalt={() => setActiveScreen('home')}
+        />
+      );
     }
     if (activeScreen === 'routines') {
       return <div className="p-4"><h1 className="text-3xl font-bold text-white">Routines</h1></div>;
@@ -96,7 +102,7 @@ const SleeperApp = ({ onStartAwakening }) => {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-gray-900 text-gray-200 rounded-lg shadow-lg font-sans flex flex-col" style={{ height: '812px' }}>
+    <div className="w-full max-w-4xl mx-auto bg-gray-900 text-gray-200 rounded-lg shadow-lg font-sans flex flex-col">
       <div className="flex-grow overflow-y-auto">
         {renderContent()}
       </div>
@@ -115,7 +121,7 @@ const SleeperApp = ({ onStartAwakening }) => {
 };
 
 // --- AEGIS APP COMPONENTS ---
-const AegisHeader = () => (
+const AegisHeader = ({ onNavigate }) => (
   <div className="border-2 border-green-500 p-2 font-mono text-green-400 bg-black">
     <div className="flex justify-between items-center border-b-2 border-green-500 pb-1 mb-1">
       <h1 className="text-lg font-bold">[A.E.G.I.S] PROTOCOL</h1>
@@ -125,8 +131,8 @@ const AegisHeader = () => (
       </div>
     </div>
     <div className="flex justify-around text-xs">
-      <button className="hover:bg-green-500 hover:text-black p-1">[1] //MSG_BOARD</button>
-      <button className="hover:bg-green-500 hover:text-black p-1">[2] OPERATOR_PROFILE</button>
+      <button onClick={() => onNavigate('board')} className="hover:bg-green-500 hover:text-black p-1">[1] //MSG_BOARD</button>
+      <button onClick={() => onNavigate('market')} className="hover:bg-green-500 hover:text-black p-1">[2] //BLACK_MARKET</button>
     </div>
   </div>
 );
@@ -147,23 +153,54 @@ const AegisMissionBoard = ({ onAccept }) => (
   </div>
 );
 
+const AegisBlackMarket = ({ onBack }) => (
+  <div className="p-2 md:p-4 font-mono text-green-400">
+    <h2 className="text-lg font-bold mb-2">//BLACK_MARKET - Encrypted Node</h2>
+    <div className="border border-green-500 p-2 bg-black/50 space-y-2">
+      {window.marketItems.map(item => (
+        <div key={item.id} className="border-b border-gray-700 pb-2">
+          <p>{'> '} {item.name} [COST: {item.cost}c]</p>
+          <p className="text-xs text-gray-400">{item.description}</p>
+        </div>
+      ))}
+    </div>
+    <button onClick={onBack} className="mt-4 bg-green-600 text-black font-bold py-1 px-3 hover:bg-green-400 border border-green-400">&lt; RETURN TO BOARD</button>
+  </div>
+);
+
 const AegisApp = () => {
+  const [screen, setScreen] = useState('board');
   const [activeMission, setActiveMission] = useState(null);
 
   const handleAccept = (mission) => {
     setActiveMission(mission);
+    setScreen('logger');
+  };
+
+  const handleHalt = () => {
+    setActiveMission(null);
+    setScreen('board');
   };
 
   const renderContent = () => {
-    if (activeMission) {
-      return <WorkoutLoggerApex directive={activeMission} stats={{ time: 0, volume: 0, cCreds: 0 }} />;
+    if (screen === 'logger' && activeMission) {
+      return (
+        <WorkoutLoggerApex
+          directive={activeMission}
+          stats={{ time: 0, volume: 0, cCreds: 0 }}
+          onHalt={handleHalt}
+        />
+      );
+    }
+    if (screen === 'market') {
+      return <AegisBlackMarket onBack={() => setScreen('board')} />;
     }
     return <AegisMissionBoard onAccept={handleAccept} />;
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-black text-green-400 rounded-lg shadow-lg font-mono flex flex-col" style={{ height: '812px' }}>
-      <AegisHeader />
+    <div className="w-full max-w-4xl mx-auto bg-black text-green-400 rounded-lg shadow-lg font-mono flex flex-col">
+      <AegisHeader onNavigate={setScreen} />
       <div className="flex-grow overflow-y-auto">
         {renderContent()}
       </div>
