@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script type="text/babel" src="src/database.js"></script>
-    <script type="text/babel" src="src/minigames/DefragMinigame.js"></script>
+    <script type="text/babel" src="src/minigames/FirewallMinigame.js"></script>
     <script type="text/babel" src="src/ExerciseHistory.js"></script>
     <script type="text/babel" src="systems/LevelingSystem.js"></script>
     <script type="text/babel" src="systems/RewardSystem.js"></script>
@@ -245,7 +245,7 @@ const BlackMarket = ({ operator, onPurchase, onNav }) => {
 
 // --- WORKOUT LOGGER COMPONENTS ---
 
-const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
+const SetLogger = ({ exercise, loggedSets, onLogSet, lastSet }) => {
     const [reps, setReps] = React.useState('');
     const [weight, setWeight] = React.useState('');
     const [time, setTime] = React.useState('');
@@ -253,6 +253,17 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
     // Pull previous weight/reps for quick loading on weight-based exercises
 
     const loadPreviousData = () => {
+        if (lastSet) {
+            if (exercise.type === 'weight_reps') {
+                setWeight(lastSet.weight || '');
+                setReps(lastSet.reps || '');
+            } else if (exercise.type === 'reps_only') {
+                setReps(lastSet.reps || '');
+            } else if (exercise.type === 'timed') {
+                setTime(lastSet.reps || '');
+            }
+            return;
+        }
         const match = exercise.previous.match(/(\d+\.?\d*)kg.*?(\d+)/);
         if (match) {
             setWeight(match[1]);
@@ -360,7 +371,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
     const [swapTarget, setSwapTarget] = React.useState(null);
     const [feedback, setFeedback] = React.useState(isAegis ? '// Begin directive.' : 'Begin routine.');
     const [isResting, setIsResting] = React.useState(false);
-    const [showDefrag, setShowDefrag] = React.useState(false);
+    const [showFirewall, setShowFirewall] = React.useState(false);
 
     const [restTimeLeft, setRestTimeLeft] = React.useState(0);
     const playBeep = () => {
@@ -374,6 +385,14 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
             osc.stop(ctx.currentTime + 0.1);
         } catch (e) {}
     };
+
+    const getLastSet = React.useCallback((exId) => {
+        for (let i = history.length - 1; i >= 0; i--) {
+            const sets = history[i].sets[exId];
+            if (sets && sets.length) return sets[sets.length - 1];
+        }
+        return null;
+    }, [history]);
     const totalSets = React.useMemo(() => exercises.reduce((s, e) => s + e.targetSets, 0), [exercises]);
     const loggedCount = Object.values(sessionSets).reduce((s, arr) => s + arr.length, 0);
     const progress = Math.floor((loggedCount / totalSets) * 100);
@@ -407,7 +426,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
             return () => clearTimeout(timerId);
         } else if (isResting && restTimeLeft === 0) {
             setIsResting(false);
-            setShowDefrag(false);
+            setShowFirewall(false);
             setFeedback(isAegis ? "// REST PERIOD COMPLETE. RESUME DIRECTIVE." : "Rest complete. Continue routine.");
         }
     }, [isResting, restTimeLeft]);
@@ -460,7 +479,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
         });
         setIsResting(true);
         setRestTimeLeft(90);
-        setShowDefrag(false);
+        setShowFirewall(false);
         setFeedback(isAegis ? "// SET LOGGED. REST PERIOD INITIATED..." : "Set logged. Rest started...");
     };
 
@@ -478,21 +497,21 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
                     <h3 className="text-red-500 font-bold">
                         // SYSTEM IDLE :: RESTING :: {restTimeLeft}s
                     </h3>
-                    {!showDefrag ? (
+                    {!showFirewall ? (
                         <button
-                            onClick={() => setShowDefrag(true)}
+                            onClick={() => setShowFirewall(true)}
                             className="w-full bg-green-800 text-white font-bold py-2 px-3 mt-2 hover:bg-green-600 border border-green-600"
                         >
-                            INITIATE //DEFRAG? [Y/N]
+                            INITIATE //FIREWALL? [Y/N]
                         </button>
                     ) : (
-                        <DefragMinigame
+                        <FirewallMinigame
                             timeLeft={restTimeLeft}
                             onGameEnd={(finalScore) => {
                                 const cCredsAwarded = Math.floor(finalScore / 10);
                                 if (cCredsAwarded > 0) {
                                     onUpdateCCreds(cCredsAwarded);
-                                    setFeedback(isAegis ? `// DEFRAG COMPLETE. +${cCredsAwarded} C-Creds` : 'Rest complete.');
+                                    setFeedback(isAegis ? `// FIREWALL COMPLETE. +${cCredsAwarded} C-Creds` : 'Rest complete.');
                                 }
                             }}
                         />
@@ -535,7 +554,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
                                 <>
                                     {/* Historical performance for this exercise */}
                                     <ExerciseHistory exerciseId={exercise.id} history={history} />
-                                    <SetLogger exercise={exercise} loggedSets={loggedSets} onLogSet={handleLogSet} />
+                                    <SetLogger exercise={exercise} loggedSets={loggedSets} onLogSet={handleLogSet} lastSet={getLastSet(exercise.id)} />
                                 </>
                             )}
                         </div>
