@@ -6,7 +6,7 @@
 const { useState, useEffect } = React;
 
 // Parent component manages all logged sets across exercises.
-function WorkoutLoggerApex({ directive, stats }) {
+function WorkoutLoggerApex({ directive, stats, onHalt }) {
   // loggedSets: { [exercise.id]: Array<{ set: number, weight: number, reps: number, time: number }> }
   const [loggedSets, setLoggedSets] = useState({});
   const [expandedExerciseId, setExpandedExerciseId] = useState(null);
@@ -72,7 +72,12 @@ function WorkoutLoggerApex({ directive, stats }) {
         })}
       </div>
       <div className="border-t-2 border-green-700 pt-2 mt-2">
-        <button className="w-full bg-red-800 text-white font-bold py-2 px-3 border border-red-700 hover:bg-red-700">[HALT DIRECTIVE]</button>
+        <button
+          onClick={onHalt}
+          className="w-full bg-red-800 text-white font-bold py-2 px-3 border border-red-700 hover:bg-red-700"
+        >
+          [HALT DIRECTIVE]
+        </button>
       </div>
     </div>
   );
