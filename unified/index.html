@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
-  <div id="overlay" class="fixed inset-0 z-50"></div>
+  <div id="overlay" class="fixed inset-0 z-50 hidden"></div>
   <iframe id="sleeperFrame" src="../sleeper/" class="w-full h-screen border-0"></iframe>
   <iframe id="aegisFrame" src="../index.html" class="w-full h-screen border-0 hidden"></iframe>
 
@@ -29,11 +29,13 @@
     };
 
     const startAwakening = () => {
+      overlay.classList.remove('hidden');
       ReactDOM.render(
         <AwakeningEvent onComplete={() => {
           showFrame(aegisFrame);
           localStorage.setItem('hasAwakened', 'true');
           ReactDOM.unmountComponentAtNode(overlay);
+          overlay.classList.add('hidden');
         }} />,
         overlay
       );
