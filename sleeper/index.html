@@ -241,7 +241,13 @@
 
       const handleFinish = (session) => {
         setHistory(prev => [...prev, session]);
-        setResonance(prev => prev + session.setsLogged);
+        setResonance(prev => {
+          const val = prev + session.setsLogged;
+          if (val >= 100 && window.parent !== window) {
+            window.parent.postMessage({ type: 'awaken' }, '*');
+          }
+          return val;
+        });
         setActiveWorkout(null);
       };
 
