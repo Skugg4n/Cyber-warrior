@@ -13,7 +13,7 @@ const aegisDirectives = window.missionsData || [];
 
 const AppContext = createContext();
 
-export const AppProvider = ({ children }) => {
+const AppProvider = ({ children }) => {
   const [hasAwakened, setHasAwakened] = useState(() => {
     return localStorage.getItem('aegis_hasAwakened') === 'true';
   });
@@ -32,7 +32,7 @@ export const AppProvider = ({ children }) => {
   );
 };
 
-export const useAppContext = () => useContext(AppContext);
+const useAppContext = () => useContext(AppContext);
 
 // Helper icons used in the UI
 const HomeIcon = () => (
