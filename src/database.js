@@ -15,6 +15,8 @@ window.initialOperatorData = {
   dataFragments: 0,
   augments: ['Stock Chassis Mk I'],
   inventory: [],
+  currentStreak: 0,
+  lastLoginDate: null,
 };
 
 window.missionsData = [
