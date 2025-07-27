@@ -4,9 +4,11 @@ A single page workout tracker built with React and TailwindCSS. The
 application runs entirely in the browser so it can be hosted directly
 through GitHub Pages.
 
-To view the site locally open `index.html` in your browser. When
-pushing to GitHub enable GitHub Pages in the repository settings and
-point it at the `main` branch to publish the site.
+To view the site locally open `index.html` in your browser. If you prefer
+to serve the project from a local web server run `npm install` once and
+then `npm start`. When pushing to GitHub enable GitHub Pages in the
+repository settings and point it at the `main` branch to publish the
+site.
 
 ## v1.1 Update
 

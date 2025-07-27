@@ -1,0 +1,12 @@
+{
+  "name": "cyber-warrior",
+  "version": "1.0.0",
+  "description": "Cyber Warrior workout tracker - static site",
+  "scripts": {
+    "start": "serve -s ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
