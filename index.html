@@ -185,6 +185,28 @@ const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, on
     );
 };
 
+const DebugMenu = ({ onAddResonance, onForceAwakening, onResetSleeper, onAddXp, onAddCCreds }) => {
+  const { theme } = React.useContext(ThemeContext);
+  const [open, setOpen] = React.useState(false);
+  const icon = theme === 'aegis' ? '[DBG]' : '⚙️';
+  return (
+    <>
+      <button onClick={() => setOpen(o => !o)} className="fixed bottom-2 right-2 z-20 border border-green-500 bg-black/70 text-green-400 px-2 py-1 text-xs">
+        {icon}
+      </button>
+      {open && (
+        <div className="fixed bottom-12 right-2 bg-black border border-green-500 p-2 text-xs space-y-1 z-20">
+          <button className="block w-full border border-green-500" onClick={() => onAddResonance(100)}>[+100 RESONANCE]</button>
+          <button className="block w-full border border-green-500" onClick={onForceAwakening}>[FORCE AWAKENING EVENT]</button>
+          <button className="block w-full border border-green-500" onClick={onResetSleeper}>[RESET TO SLEEPER]</button>
+          <button className="block w-full border border-green-500" onClick={() => onAddXp(1000)}>[+1000 XP]</button>
+          <button className="block w-full border border-green-500" onClick={() => onAddCCreds(100)}>[+100 C-Creds]</button>
+        </div>
+      )}
+    </>
+  );
+};
+
 
 const BlackMarket = ({ operator, onPurchase, onNav }) => (
     <div className="p-2 md:p-4">
@@ -711,6 +733,13 @@ function App() {
                 <p>AEGIS PROTOCOL v1.5 - "Firewall" | System Status: <span className="text-green-400">NOMINAL</span></p>
             </footer>
         </div>
+        <DebugMenu
+          onAddResonance={debugAddResonance}
+          onForceAwakening={debugForceAwaken}
+          onResetSleeper={debugResetSleeper}
+          onAddXp={debugAddXp}
+          onAddCCreds={debugAddCCreds}
+        />
         {showAwakening && (
           <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-green-500 font-mono text-lg space-y-1 z-20">
             <p><Typewriter text="// POWER THRESHOLD REACHED..." /></p>
