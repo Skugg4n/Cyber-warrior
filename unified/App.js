@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import WorkoutLoggerApex from '../src/apex/WorkoutLoggerApex.js';
+import AwakeningEvent from '../src/features/AwakeningEvent.js';
 
 // Use the existing global databases provided by the project
 const sleeperRoutines = window.sleeperRoutines || [];
@@ -43,12 +44,12 @@ const ClipboardListIcon = () => (
 );
 
 // Debug menu to toggle awakening state
-const DebugMenu = () => {
-  const { triggerAwakening, resetToSleeper } = useAppContext();
+const DebugMenu = ({ onForceAwakening }) => {
+  const { resetToSleeper } = useAppContext();
   return (
     <div className="fixed bottom-4 right-4 bg-gray-800 bg-opacity-80 p-2 rounded border border-gray-600 text-white text-xs z-50">
       <h4 className="font-bold text-center">Debug</h4>
-      <button onClick={triggerAwakening} className="block w-full text-left p-1 hover:bg-gray-700">Force Awakening</button>
+      <button onClick={onForceAwakening} className="block w-full text-left p-1 hover:bg-gray-700">Force Awakening</button>
       <button onClick={resetToSleeper} className="block w-full text-left p-1 hover:bg-gray-700">Reset to Sleeper</button>
     </div>
   );
@@ -66,7 +67,7 @@ const SleeperHomeScreen = ({ onStart }) => (
   </div>
 );
 
-const SleeperApp = () => {
+const SleeperApp = ({ onStartAwakening }) => {
   const [activeScreen, setActiveScreen] = useState('home');
   const [activeRoutine, setActiveRoutine] = useState(null);
 
@@ -168,11 +169,22 @@ const AegisApp = () => {
 
 // --- MAIN APP SHELL ---
 const AppContent = () => {
-  const { hasAwakened } = useAppContext();
+  const { hasAwakened, triggerAwakening } = useAppContext();
+  const [isAwakening, setIsAwakening] = useState(false);
+
+  const startAwakening = () => setIsAwakening(true);
+  const handleAwakeningComplete = () => {
+    setIsAwakening(false);
+    triggerAwakening();
+  };
+
   return (
     <div className="bg-gray-900 min-h-screen flex items-center justify-center p-4">
-      {hasAwakened ? <AegisApp /> : <SleeperApp />}
-      <DebugMenu />
+      {isAwakening && <AwakeningEvent onComplete={handleAwakeningComplete} />}
+      {!isAwakening && (
+        hasAwakened ? <AegisApp /> : <SleeperApp onStartAwakening={startAwakening} />
+      )}
+      {!isAwakening && <DebugMenu onForceAwakening={startAwakening} />}
     </div>
   );
 };
