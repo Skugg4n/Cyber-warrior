@@ -72,12 +72,16 @@ const Typewriter = ({ text, speed = 30 }) => {
 
 const BBSHeader = ({ operator, onNav, resonance, awakened }) => {
   const { theme } = React.useContext(ThemeContext);
+  const isAegis = theme === 'aegis';
+  const containerCls = isAegis
+    ? 'border-green-500 text-green-400 font-mono bg-black'
+    : 'border-blue-500 text-blue-200 font-sans bg-gray-800';
   return (
-  <div className="border-2 border-green-500 p-2 font-mono text-green-400 bg-black">
-    <div className="flex justify-between items-center border-b-2 border-green-500 pb-1 mb-1">
-      <h1 className="text-lg md:text-xl font-bold">[A.E.G.I.S] PROTOCOL v1.5</h1>
+  <div className={`border-2 p-2 ${containerCls}`}>
+    <div className={`flex justify-between items-center border-b-2 pb-1 mb-1 ${isAegis ? 'border-green-500' : 'border-blue-500'}`}>
+      <h1 className="text-lg md:text-xl font-bold">{isAegis ? '[A.E.G.I.S] PROTOCOL v1.5' : 'Workout Tracker v1.5'}</h1>
       <div className="text-xs text-right">
-        {theme === 'aegis' ? (
+        {isAegis ? (
           <>
             <div>LEVEL: {operator.level}</div>
             <div>XP: {operator.xp}</div>
@@ -85,31 +89,33 @@ const BBSHeader = ({ operator, onNav, resonance, awakened }) => {
           </>
         ) : (
           <>
-            <div>OPERATOR ID: {operator.id}</div>
-            <div>SYS. INTEGRITY: {operator.systemIntegrity}</div>
-            <div>C-Creds: {operator.cCreds}c</div>
+            <div>User ID: {operator.id}</div>
+            <div>System Integrity: {operator.systemIntegrity}</div>
           </>
         )}
       </div>
     </div>
     <div className="flex justify-around text-xs md:text-sm">
-        <button onClick={() => onNav('board')} className="hover:bg-green-500 hover:text-black p-1">[1] //MSG_BOARD</button>
-        <button onClick={() => onNav('profile')} className="hover:bg-green-500 hover:text-black p-1">[2] OPERATOR_PROFILE</button>
-        <button onClick={() => onNav('market')} className="hover:bg-green-500 hover:text-black p-1">[3] //BLACK_MARKET</button>
-        <button className="text-gray-600 p-1 cursor-not-allowed">[4] LOGOUT</button>
+        <button onClick={() => onNav('board')} className={`${isAegis ? 'hover:bg-green-500' : 'hover:bg-blue-500'} hover:text-black p-1`}>{isAegis ? '[1] //MSG_BOARD' : 'Home'}</button>
+        <button onClick={() => onNav('profile')} className={`${isAegis ? 'hover:bg-green-500' : 'hover:bg-blue-500'} hover:text-black p-1`}>{isAegis ? '[2] OPERATOR_PROFILE' : 'Profile'}</button>
+        <button onClick={() => onNav('market')} className={`${isAegis ? 'hover:bg-green-500' : 'hover:bg-blue-500'} hover:text-black p-1`}>{isAegis ? '[3] //BLACK_MARKET' : 'Shop'}</button>
+        <button className="text-gray-600 p-1 cursor-not-allowed">{isAegis ? '[4] LOGOUT' : 'Logout'}</button>
     </div>
     {!awakened && (
       <div className="mt-1 w-full bg-gray-700 h-1">
-        <div className="bg-blue-500 h-full" style={{width:`${resonance}%`}}></div>
+        <div className={`${isAegis ? 'bg-green-500' : 'bg-blue-500'} h-full`} style={{width:`${resonance}%`}}></div>
       </div>
     )}
   </div>
   );
 };
 
-const MissionBoard = ({ missions, onSelectMission }) => (
+const MissionBoard = ({ missions, onSelectMission }) => {
+  const { theme } = React.useContext(ThemeContext);
+  const isAegis = theme === 'aegis';
+  return (
   <div className="p-2 md:p-4">
-    <h2 className="text-lg font-bold mb-2 text-green-400">{'>'} INCOMING DIRECTIVES...</h2>
+    <h2 className="text-lg font-bold mb-2 text-green-400">{isAegis ? '>' + ' INCOMING DIRECTIVES...' : 'Available Routines'}</h2>
     <div className="space-y-4">
       {missions.map(mission => (
         <div key={mission.id} className="border border-green-500 p-2 bg-black/50">
@@ -126,9 +132,12 @@ const MissionBoard = ({ missions, onSelectMission }) => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, onResetSleeper, onAddXp, onAddCCreds }) => {
+    const { theme } = React.useContext(ThemeContext);
+    const isAegis = theme === 'aegis';
     const [tapCount, setTapCount] = React.useState(0);
     const [showDebug, setShowDebug] = React.useState(false);
     const handleSecretTap = () => {
@@ -151,8 +160,10 @@ const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, on
                 <button className="block w-full border border-green-500" onClick={() => setShowDebug(false)}>[CLOSE]</button>
             </div>
         )}
-        <h2 className="text-lg font-bold mb-2 text-green-400">{'>'} OPERATOR_PROFILE [ {operator.id} ]</h2>
+        <h2 className="text-lg font-bold mb-2 text-green-400">{isAegis ? '>' + ' OPERATOR_PROFILE' : 'Profile'} [ {operator.id} ]</h2>
         <div className="border border-green-500 p-2 bg-black/50 space-y-2">
+            {isAegis && (
+            <>
             <div>
                 <p className="text-green-400">LEVEL:</p>
                 <p className="text-white text-xl ml-4">{operator.level}</p>
@@ -169,6 +180,7 @@ const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, on
                 <p className="text-green-400">C-CREDS:</p>
                 <p className="ml-4 text-white">{operator.cCreds}c</p>
             </div>
+            </>) }
             <div>
                 <p className="text-green-400">AUGMENTATIONS:</p>
                 <ul className="list-disc list-inside ml-4 text-green-400">
@@ -209,22 +221,26 @@ const DebugMenu = ({ onAddResonance, onForceAwakening, onResetSleeper, onAddXp, 
 };
 
 
-const BlackMarket = ({ operator, onPurchase, onNav }) => (
+const BlackMarket = ({ operator, onPurchase, onNav }) => {
+    const { theme } = React.useContext(ThemeContext);
+    const isAegis = theme === 'aegis';
+    return (
     <div className="p-2 md:p-4">
-        <h2 className="text-lg font-bold mb-2 text-green-400">{'//'}BLACK_MARKET - Encrypted Node</h2>
-        <p className="text-sm mb-2">OPERATOR C-Creds: {operator.cCreds}c</p>
+        <h2 className="text-lg font-bold mb-2 text-green-400">{isAegis ? '//BLACK_MARKET - Encrypted Node' : 'Shop'}</h2>
+        {isAegis && <p className="text-sm mb-2">OPERATOR C-Creds: {operator.cCreds}c</p>}
         <div className="border border-green-500 p-2 bg-black/50 space-y-2">
             {marketItems.map(item => (
                 <div key={item.id} className="border-b border-gray-700 pb-2">
-                    <p>{'>'} {item.name} [COST: {item.cost}c]</p>
+                    <p>{'>'} {item.name} {isAegis ? `[COST: ${item.cost}c]` : ''}</p>
                     <p className="text-xs text-gray-400">{item.description}</p>
-                    <button onClick={() => onPurchase(item)} className="mt-1 bg-green-600 text-black font-bold py-1 px-2 hover:bg-green-400 border border-green-400">[PURCHASE]</button>
+                    <button onClick={() => onPurchase(item)} className="mt-1 bg-green-600 text-black font-bold py-1 px-2 hover:bg-green-400 border border-green-400">{isAegis ? '[PURCHASE]' : 'Add'}</button>
                 </div>
             ))}
         </div>
-        <button onClick={() => onNav('board')} className="mt-4 bg-green-600 text-black font-bold py-1 px-3 hover:bg-green-400 border border-green-400">&lt; RETURN TO BOARD</button>
+        <button onClick={() => onNav('board')} className="mt-4 bg-green-600 text-black font-bold py-1 px-3 hover:bg-green-400 border border-green-400">&lt; {isAegis ? 'RETURN TO BOARD' : 'Back'}</button>
     </div>
-);
+    );
+};
 
 
 // --- WORKOUT LOGGER COMPONENTS ---
@@ -336,11 +352,13 @@ const SetLogger = ({ exercise, loggedSets, onLogSet }) => {
 };
 
 const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpdateCCreds, operator, onOperatorUpdate }) => {
+    const { theme } = React.useContext(ThemeContext);
+    const isAegis = theme === 'aegis';
     const [exercises, setExercises] = React.useState([...mission.exercises]);
     const [expandedExerciseId, setExpandedExerciseId] = React.useState(mission.exercises[0].id);
     const [sessionSets, setSessionSets] = React.useState({});
     const [swapTarget, setSwapTarget] = React.useState(null);
-    const [feedback, setFeedback] = React.useState('// Begin directive.');
+    const [feedback, setFeedback] = React.useState(isAegis ? '// Begin directive.' : 'Begin routine.');
     const [isResting, setIsResting] = React.useState(false);
     const [showDefrag, setShowDefrag] = React.useState(false);
 
@@ -390,7 +408,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
         } else if (isResting && restTimeLeft === 0) {
             setIsResting(false);
             setShowDefrag(false);
-            setFeedback("// REST PERIOD COMPLETE. RESUME DIRECTIVE.");
+            setFeedback(isAegis ? "// REST PERIOD COMPLETE. RESUME DIRECTIVE." : "Rest complete. Continue routine.");
         }
     }, [isResting, restTimeLeft]);
 
@@ -419,21 +437,21 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
         newSet.breakthrough = breakthrough;
         if (breakthrough) {
             onUpdateCCreds(5);
-            setFeedback(`// BREAKTHROUGH! +${xpGained} XP, +5 C-Creds`);
+            setFeedback(isAegis ? `// BREAKTHROUGH! +${xpGained} XP, +5 C-Creds` : 'Breakthrough achieved!');
         } else {
-            setFeedback(`// LOGGED: ${reps}x${weight || 0}kg. +${xpGained} DATA PACKETS`);
+            setFeedback(isAegis ? `// LOGGED: ${reps}x${weight || 0}kg. +${xpGained} DATA PACKETS` : `Logged ${reps} reps`);
         }
         const { updated, message } = RewardSystem.rollDataSpike(operator);
         if (message) {
             onOperatorUpdate(() => updated);
-            setFeedback(message);
+            setFeedback(isAegis ? message : '');
         } else if (Math.random() < 0.03) {
             onOperatorUpdate(prev => ({ ...prev, dataFragments: (prev.dataFragments || 0) + 1 }));
             const frag = (operator.dataFragments || 0) + 1;
-            setFeedback(`// ENCRYPTED DATA FRAGMENT FOUND [${frag}/3]`);
+            setFeedback(isAegis ? `// ENCRYPTED DATA FRAGMENT FOUND [${frag}/3]` : '');
         } else if (Math.random() < 0.02) {
             onOperatorUpdate(prev => ({ ...prev, xpMultiplier: 2 }));
-            setFeedback('// WARNING: POWER SURGE! Next set earns 2.0x DATA_PACKETS');
+            setFeedback(isAegis ? '// WARNING: POWER SURGE! Next set earns 2.0x DATA_PACKETS' : '');
         }
         setResonance(prev => {
             const val = Math.min(100, prev + 1);
@@ -443,14 +461,14 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
         setIsResting(true);
         setRestTimeLeft(90);
         setShowDefrag(false);
-        setFeedback("// SET LOGGED. REST PERIOD INITIATED...");
+        setFeedback(isAegis ? "// SET LOGGED. REST PERIOD INITIATED..." : "Set logged. Rest started...");
     };
 
     const allExercisesComplete = exercises.every(ex => (sessionSets[ex.id] || []).length >= ex.targetSets);
 
     return (
         <div className="p-2 md:p-4">
-            <h2 className="text-lg font-bold mb-1 text-red-500 animate-pulse">{'>'}! ACTIVE DIRECTIVE: {mission.title}</h2>
+            <h2 className="text-lg font-bold mb-1 text-red-500 animate-pulse">{isAegis ? '>' + '! ACTIVE DIRECTIVE: ' + mission.title : 'Active Routine: ' + mission.title}</h2>
             <div className="w-full bg-gray-800 border border-green-700 h-2 mb-2">
                 <div className="bg-green-500 h-full" style={{width: `${progress}%`}}></div>
             </div>
@@ -474,7 +492,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
                                 const cCredsAwarded = Math.floor(finalScore / 10);
                                 if (cCredsAwarded > 0) {
                                     onUpdateCCreds(cCredsAwarded);
-                                    setFeedback(`// DEFRAG COMPLETE. +${cCredsAwarded} C-Creds`);
+                                    setFeedback(isAegis ? `// DEFRAG COMPLETE. +${cCredsAwarded} C-Creds` : 'Rest complete.');
                                 }
                             }}
                         />
@@ -529,7 +547,7 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
                     onClick={() => onCompleteMission(mission.xp, allExercisesComplete, sessionSets)}
                     className={`w-full font-bold py-2 px-3 border ${allExercisesComplete ? 'bg-red-600 text-white border-red-400 hover:bg-red-400 animate-pulse' : 'bg-yellow-700 text-yellow-200 border-yellow-500'}`}
                 >
-                    {allExercisesComplete ? 'COMPLETE DIRECTIVE' : '[HALT DIRECTIVE]'}
+                    {allExercisesComplete ? (isAegis ? 'COMPLETE DIRECTIVE' : 'Finish Routine') : (isAegis ? '[HALT DIRECTIVE]' : '[STOP]')}
                 </button>
             </div>
         </div>
@@ -537,6 +555,8 @@ const WorkoutLogger = ({ mission, history, onCompleteMission, onUpdateXp, onUpda
 };
 
 const DirectiveSummary = ({ data, onContinue }) => {
+    const { theme } = React.useContext(ThemeContext);
+    const isAegis = theme === 'aegis';
     const formatTime = (sec) => {
         const m = Math.floor(sec / 60).toString().padStart(2, '0');
         const s = (sec % 60).toString().padStart(2, '0');
@@ -544,18 +564,18 @@ const DirectiveSummary = ({ data, onContinue }) => {
     };
     return (
         <div className="p-2 md:p-4">
-            <h2 className="text-lg font-bold mb-2 text-green-400">&gt; DIRECTIVE COMPLETE</h2>
+            <h2 className="text-lg font-bold mb-2 text-green-400">{isAegis ? '> DIRECTIVE COMPLETE' : 'Routine Complete'}</h2>
             <div className="border border-green-500 p-2 bg-black/50 text-xs space-y-1">
                 <p className="font-bold text-green-400">{data.mission.title}</p>
                 <p>TOTAL VOLUME: {data.totalVolume} kg</p>
                 <p>TIME ELAPSED: {formatTime(data.timeElapsed)}</p>
                 <p>PERFORMANCE_BREAKTHROUGHS: {data.breakthroughs}</p>
-                <p>+{data.xp} DATA_PACKETS</p>
-                {data.cCreds > 0 && <p>+{data.cCreds} C-Creds</p>}
+                {isAegis && <p>+{data.xp} DATA_PACKETS</p>}
+                {isAegis && data.cCreds > 0 && <p>+{data.cCreds} C-Creds</p>}
                 <p>REWARD: {data.mission.reward}</p>
             </div>
             <button onClick={onContinue} className="mt-4 bg-green-600 text-black font-bold py-1 px-3 hover:bg-green-400 border border-green-400">
-                [CONTINUE TO //MSG_BOARD]
+                {isAegis ? '[CONTINUE TO //MSG_BOARD]' : 'Return Home'}
             </button>
         </div>
     );
