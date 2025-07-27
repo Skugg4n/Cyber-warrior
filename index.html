@@ -17,6 +17,7 @@
     <script type="text/babel" src="src/ExerciseHistory.js"></script>
     <script type="text/babel" src="systems/LevelingSystem.js"></script>
     <script type="text/babel" src="systems/RewardSystem.js"></script>
+    <script type="text/babel" src="src/ThemeContext.js"></script>
     <script type="text/babel">
     
 // --- MOCK DATA ---
@@ -30,7 +31,6 @@ const getInitialState = () => {
       operator: data.operator || { id: `#${Math.random().toString(16).substr(2,6).toUpperCase()}`, ...initialOperatorData },
       history: data.history || [],
       resonance: data.resonance || 0,
-      theme: data.theme || 'sleeper',
       awakened: data.awakened || false,
     };
   }
@@ -41,12 +41,11 @@ const getInitialState = () => {
     },
     history: [],
     resonance: 0,
-    theme: 'sleeper',
     awakened: false,
   };
 };
 
-const ThemeContext = React.createContext({ theme: 'sleeper', setTheme: () => {} });
+
 
 // --- HELPER COMPONENTS ---
 
@@ -511,7 +510,7 @@ function App() {
   const [operator, setOperator] = React.useState(initialData.operator);
   const [workoutHistory, setWorkoutHistory] = React.useState(initialData.history);
   const [resonance, setResonance] = React.useState(initialData.resonance);
-  const [theme, setTheme] = React.useState(initialData.theme);
+  const { theme, setTheme } = React.useContext(ThemeContext);
   const [awakened, setAwakened] = React.useState(initialData.awakened);
   const [missions, setMissions] = React.useState(missionsData);
   const [currentScreen, setCurrentScreen] = React.useState('board');
@@ -524,9 +523,9 @@ function App() {
   React.useEffect(() => { setTimeout(() => setIsLoading(false), 1500); }, []);
 
   React.useEffect(() => {
-    const appData = { operator, history: workoutHistory, resonance, theme, awakened };
+    const appData = { operator, history: workoutHistory, resonance, awakened };
     localStorage.setItem('aegis_app_data', JSON.stringify(appData));
-  }, [operator, workoutHistory, resonance, theme, awakened]);
+  }, [operator, workoutHistory, resonance, awakened]);
   const handleNavigation = (screen) => { setCurrentScreen(screen); };
   
   const handleSelectMission = (missionId) => {
@@ -629,7 +628,6 @@ function App() {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
     <div className={`min-h-screen p-2 sm:p-4 ${theme === 'aegis' ? 'bg-black text-green-400 font-mono' : 'bg-gray-900 text-blue-200 font-sans'}` }>
         <div className="max-w-4xl mx-auto bg-black/50 border-4 border-green-500">
             <BBSHeader operator={operator} onNav={handleNavigation} resonance={resonance} awakened={awakened} />
@@ -650,11 +648,15 @@ function App() {
           </div>
         )}
     </div>
-    </ThemeContext.Provider>
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>,
+  document.getElementById('root')
+);
     </script>
 </body>
 </html>
