@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+// This component renders the workout logger used by both the
+// Sleeper and AEGIS interfaces. It relies on the global React
+// instance provided in index.html so we don't import React as a
+// module. The component is attached to the `window` object at the
+// bottom of the file for use in inline Babel scripts.
+const { useState, useEffect } = React;
 
 // Parent component manages all logged sets across exercises.
-export default function WorkoutLoggerApex({ directive, stats }) {
+function WorkoutLoggerApex({ directive, stats }) {
   // loggedSets: { [exercise.id]: Array<{ set: number, weight: number, reps: number, time: number }> }
   const [loggedSets, setLoggedSets] = useState({});
   const [expandedExerciseId, setExpandedExerciseId] = useState(null);
@@ -201,3 +206,5 @@ function SetRow({ setNumber, exercise, isLogged, defaults, onToggle }) {
     </tr>
   );
 }
+
+window.WorkoutLoggerApex = WorkoutLoggerApex;

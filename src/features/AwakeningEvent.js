@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// AwakeningEvent renders the brief glitch animation that plays when the
+// user crosses the resonance threshold. It uses the global React object
+// exposed in index.html, so we don't import React as a module.
+const { useState, useEffect } = React;
 
 // This component renders the "glitch" awakening animation. Display it
 // fullscreen when the RESONANCE_SYNC bar reaches 100% and handle the
@@ -92,4 +95,4 @@ const AwakeningEvent = ({ onComplete }) => {
   }
 };
 
-export default AwakeningEvent;
+window.AwakeningEvent = AwakeningEvent;

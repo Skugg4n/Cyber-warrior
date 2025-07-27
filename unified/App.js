@@ -1,7 +1,11 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
-import WorkoutLoggerApex from '../src/apex/WorkoutLoggerApex.js';
-import AwakeningEvent from '../src/features/AwakeningEvent.js';
+// The unified app is executed directly in the browser without a
+// bundler. React and ReactDOM are loaded via CDN which exposes them
+// as globals. Additional components are included through separate
+// Babel scripts and attached to `window`.
+const { useState, useEffect, createContext, useContext } = React;
+const { render } = ReactDOM;
+const WorkoutLoggerApex = window.WorkoutLoggerApex;
+const AwakeningEvent = window.AwakeningEvent;
 
 // Use the existing global databases provided by the project
 const sleeperRoutines = window.sleeperRoutines || [];
@@ -197,6 +201,5 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
-
-export default App;
+render(<App />, document.getElementById('root'));
+window.App = App;
