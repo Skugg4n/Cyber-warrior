@@ -1,9 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import WorkoutLoggerApex from './WorkoutLoggerApex.js';
-import { mockDirective, mockSessionStats } from './mockData.js';
+const { render } = ReactDOM;
 
-ReactDOM.render(
-  <WorkoutLoggerApex directive={mockDirective} stats={mockSessionStats} />,
+render(
+  <WorkoutLoggerApex directive={window.mockDirective} stats={window.mockSessionStats} />,
   document.getElementById('root')
 );
