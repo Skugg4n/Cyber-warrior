@@ -157,7 +157,7 @@ const MissionBoard = ({ missions, onSelectMission }) => {
   );
 };
 
-const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, onResetSleeper, onAddXp, onAddCCreds }) => {
+const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, onResetSleeper, onAddXp, onAddCCreds, onAddCharge }) => {
     const { theme } = React.useContext(ThemeContext);
     const isAegis = theme === 'aegis';
     const [tapCount, setTapCount] = React.useState(0);
@@ -179,6 +179,8 @@ const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, on
                 <button className="block w-full border border-green-500" onClick={onResetSleeper}>[RESET TO SLEEPER]</button>
                 <button className="block w-full border border-green-500" onClick={() => onAddXp(1000)}>[+1000 XP]</button>
                 <button className="block w-full border border-green-500" onClick={() => onAddCCreds(100)}>[+100 C-Creds]</button>
+                <button className="block w-full border border-green-500" onClick={() => onAddCCreds(500)}>[+500 C-Creds]</button>
+                <button className="block w-full border border-green-500" onClick={() => onAddCharge(50)}>[+50 CHARGE]</button>
                 <button className="block w-full border border-green-500" onClick={() => setShowDebug(false)}>[CLOSE]</button>
             </div>
         )}
@@ -224,7 +226,7 @@ const OperatorProfile = ({ operator, onNav, onAddResonance, onForceAwakening, on
     );
 };
 
-const DebugMenu = ({ onAddResonance, onForceAwakening, onResetSleeper, onAddXp, onAddCCreds }) => {
+const DebugMenu = ({ onAddResonance, onForceAwakening, onResetSleeper, onAddXp, onAddCCreds, onAddCharge }) => {
   const { theme } = React.useContext(ThemeContext);
   const [open, setOpen] = React.useState(false);
   const icon = theme === 'aegis' ? '[DBG]' : '⚙️';
@@ -240,6 +242,8 @@ const DebugMenu = ({ onAddResonance, onForceAwakening, onResetSleeper, onAddXp, 
           <button className="block w-full border border-green-500" onClick={onResetSleeper}>[RESET TO SLEEPER]</button>
           <button className="block w-full border border-green-500" onClick={() => onAddXp(1000)}>[+1000 XP]</button>
           <button className="block w-full border border-green-500" onClick={() => onAddCCreds(100)}>[+100 C-Creds]</button>
+          <button className="block w-full border border-green-500" onClick={() => onAddCCreds(500)}>[+500 C-Creds]</button>
+          <button className="block w-full border border-green-500" onClick={() => onAddCharge(50)}>[+50 CHARGE]</button>
         </div>
       )}
     </>
@@ -752,6 +756,17 @@ function App() {
     handleUpdateCCreds(amt);
   }, [handleUpdateCCreds]);
 
+  const debugAddCharge = React.useCallback((amt) => {
+    setOperator(prev => ({
+      ...prev,
+      engine: {
+        ...prev.engine,
+        charge: Math.min(prev.engine.maxCharge, prev.engine.charge + amt),
+        lastUpdated: Date.now(),
+      }
+    }));
+  }, []);
+
   const handleUpgradeEngineComponent = React.useCallback((comp, cost) => {
     setOperator(prev => {
       if(prev.cCreds < cost) return prev;
@@ -830,6 +845,7 @@ function App() {
             onResetSleeper={debugResetSleeper}
             onAddXp={debugAddXp}
             onAddCCreds={debugAddCCreds}
+            onAddCharge={debugAddCharge}
           />
         );
       case 'logging': return <WorkoutLogger mission={activeMission} history={workoutHistory} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} onUpdateCCreds={handleUpdateCCreds} operator={operator} onOperatorUpdate={setOperator} />;
@@ -868,6 +884,7 @@ function App() {
           onResetSleeper={debugResetSleeper}
           onAddXp={debugAddXp}
           onAddCCreds={debugAddCCreds}
+          onAddCharge={debugAddCharge}
         />
         {showAwakening && (
           <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-green-500 font-mono text-lg space-y-1 z-20">
