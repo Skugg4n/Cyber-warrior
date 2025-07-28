@@ -18,6 +18,8 @@
     <script type="text/babel" src="systems/LevelingSystem.js"></script>
     <script type="text/babel" src="systems/RewardSystem.js"></script>
     <script type="text/babel" src="src/ThemeContext.js"></script>
+    <script type="text/babel" src="systems/EngineSystem.js"></script>
+    <script type="text/babel" src="src/features/ResonanceEngineScreen.js"></script>
     <script type="text/babel">
     
 // --- MOCK DATA ---
@@ -29,6 +31,9 @@ const getInitialState = () => {
     const data = JSON.parse(savedData);
     if (data.operator && !data.operator.xpMultiplier) data.operator.xpMultiplier = 1;
     const operator = data.operator || { id: `#${Math.random().toString(16).substr(2,6).toUpperCase()}`, ...initialOperatorData };
+    if(!operator.engine) operator.engine = JSON.parse(JSON.stringify(initialOperatorData.engine));
+    if(!operator.engine.lastUpdated) operator.engine.lastUpdated = Date.now();
+    if(typeof operator.baselineWorkCapacity === 'undefined') operator.baselineWorkCapacity = null;
     const today = new Date().toISOString().slice(0,10);
     if(!operator.lastLoginDate){
       operator.lastLoginDate = today;
@@ -52,6 +57,7 @@ const getInitialState = () => {
       ...initialOperatorData,
       lastLoginDate: new Date().toISOString().slice(0,10),
       currentStreak: 1,
+      engine: { ...initialOperatorData.engine, lastUpdated: Date.now() },
     },
     history: [],
     resonance: 0,
@@ -114,7 +120,8 @@ const BBSHeader = ({ operator, onNav, resonance, awakened }) => {
         <button onClick={() => onNav('board')} className={`${isAegis ? 'hover:bg-green-500' : 'hover:bg-blue-500'} hover:text-black p-1`}>{isAegis ? '[1] //MSG_BOARD' : 'Home'}</button>
         <button onClick={() => onNav('profile')} className={`${isAegis ? 'hover:bg-green-500' : 'hover:bg-blue-500'} hover:text-black p-1`}>{isAegis ? '[2] OPERATOR_PROFILE' : 'Profile'}</button>
         <button onClick={() => onNav('market')} className={`${isAegis ? 'hover:bg-green-500' : 'hover:bg-blue-500'} hover:text-black p-1`}>{isAegis ? '[3] //BLACK_MARKET' : 'Shop'}</button>
-        <button className="text-gray-600 p-1 cursor-not-allowed">{isAegis ? '[4] LOGOUT' : 'Logout'}</button>
+        <button onClick={() => onNav('engine')} className={`${isAegis ? 'hover:bg-green-500' : 'hover:bg-blue-500'} hover:text-black p-1`}>{isAegis ? '[4] //RESONANCE_ENGINE' : 'Engine'}</button>
+        <button className="text-gray-600 p-1 cursor-not-allowed">{isAegis ? '[5] LOGOUT' : 'Logout'}</button>
     </div>
     {!awakened && (
       <div className="mt-1 w-full bg-gray-700 h-1">
@@ -647,6 +654,15 @@ function App() {
   }, []);
 
   React.useEffect(() => {
+    if(awakened){
+      setOperator(prev => {
+        const result = EngineSystem.calculateOfflineProgress({...prev.engine});
+        return { ...prev, cCreds: prev.cCreds + Math.floor(result.cCredsGenerated), engine: { ...prev.engine, charge: result.newCharge, lastUpdated: Date.now() } };
+      });
+    }
+  }, []);
+
+  React.useEffect(() => {
     const appData = { operator, history: workoutHistory, resonance, awakened };
     localStorage.setItem('aegis_app_data', JSON.stringify(appData));
   }, [operator, workoutHistory, resonance, awakened]);
@@ -722,6 +738,26 @@ function App() {
     handleUpdateCCreds(amt);
   }, [handleUpdateCCreds]);
 
+  const handleUpgradeEngineComponent = React.useCallback((comp, cost) => {
+    setOperator(prev => {
+      if(prev.cCreds < cost) return prev;
+      const existing = prev.engine.components[comp];
+      const newLevel = existing.level + 1;
+      let updatedComp = { ...existing, level: newLevel };
+      if(comp === 'resonator') updatedComp.multiplier = +(0.1 * newLevel).toFixed(2);
+      if(comp === 'injectors') updatedComp.multiplier = +(1 + 0.5*(newLevel-1)).toFixed(2);
+      if(comp === 'field') updatedComp.decayRate = +(Math.max(0.1, existing.decayRate - 0.2)).toFixed(2);
+      return {
+        ...prev,
+        cCreds: prev.cCreds - cost,
+        engine: {
+          ...prev.engine,
+          components: { ...prev.engine.components, [comp]: updatedComp }
+        }
+      };
+    });
+  }, []);
+
   const handleCompleteMission = React.useCallback((baseXp, flawless, sessionData) => {
     handleUpdateXp(baseXp);
     if (activeMission && activeMission.reward.includes("SCHEMATIC")) {
@@ -751,7 +787,18 @@ function App() {
         timeElapsed,
         breakthroughs
     };
-    setWorkoutHistory(prev => [...prev, { missionId: activeMission.id, sets: sessionData, summary, timestamp: Date.now() }]);
+    const entry = { missionId: activeMission.id, sets: sessionData, summary, timestamp: Date.now() };
+    setWorkoutHistory(prev => [...prev, entry]);
+    const updatedHistory = [...workoutHistory, entry];
+    if(!awakened){
+      const baseline = EngineSystem.calculateBaseline(updatedHistory, operator.baselineWorkCapacity);
+      if(baseline && !operator.baselineWorkCapacity){
+        setOperator(prev => ({ ...prev, baselineWorkCapacity: baseline }));
+      }
+    } else {
+      const charge = EngineSystem.calculateChargeGained({ volume: totalVolume, durationInMinutes: timeElapsed/60 }, operator.baselineWorkCapacity || 1, operator.engine.components.injectors.multiplier);
+      setOperator(prev => ({ ...prev, engine: { ...prev.engine, charge: Math.min(prev.engine.maxCharge, prev.engine.charge + charge), lastUpdated: Date.now() } }));
+    }
     setSummaryData(summary);
     setActiveMission(null);
     setCurrentScreen('summary');
@@ -774,6 +821,7 @@ function App() {
       case 'logging': return <WorkoutLogger mission={activeMission} history={workoutHistory} onCompleteMission={handleCompleteMission} onUpdateXp={handleUpdateXp} onUpdateCCreds={handleUpdateCCreds} operator={operator} onOperatorUpdate={setOperator} />;
       case 'summary': return <DirectiveSummary data={summaryData} onContinue={() => setCurrentScreen('board')} />;
       case 'market': return <BlackMarket operator={operator} onPurchase={handlePurchaseItem} onNav={handleNavigation} />;
+      case 'engine': return <ResonanceEngineScreen operator={operator} onUpgrade={handleUpgradeEngineComponent} onNav={handleNavigation} />;
       default: return <MissionBoard missions={missions} onSelectMission={handleSelectMission} />;
     }
   };
