@@ -34,6 +34,19 @@
     return { newCharge, cCredsGenerated };
   }
 
-  global.EngineSystem = { calculateBaseline, calculateChargeGained, calculateOfflineProgress };
+  function updateEngineOnTick(engineState){
+    const secondsPerTick = 5;
+    const hoursPerTick = secondsPerTick / 3600;
+
+    const chargeDecayed = hoursPerTick * engineState.components.field.decayRate;
+    const newCharge = Math.max(0, engineState.charge - chargeDecayed);
+
+    const avgCharge = (engineState.charge + newCharge) / 2;
+    const cCredsGenerated = hoursPerTick * (avgCharge * engineState.components.resonator.multiplier);
+
+    return { charge: newCharge, cCredsToAdd: cCredsGenerated };
+  }
+
+  global.EngineSystem = { calculateBaseline, calculateChargeGained, calculateOfflineProgress, updateEngineOnTick };
 })(window);
 
