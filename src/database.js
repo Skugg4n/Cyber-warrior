@@ -17,6 +17,17 @@ window.initialOperatorData = {
   inventory: [],
   currentStreak: 0,
   lastLoginDate: null,
+  baselineWorkCapacity: null,
+  engine: {
+    charge: 0,
+    maxCharge: 200,
+    lastUpdated: null,
+    components: {
+      resonator: { level: 1, multiplier: 0.1 },
+      injectors: { level: 1, multiplier: 1.0 },
+      field: { level: 1, decayRate: 1.0 }
+    }
+  },
 };
 
 window.missionsData = [
