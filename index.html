@@ -663,6 +663,20 @@ function App() {
   }, []);
 
   React.useEffect(() => {
+    const engineTickInterval = setInterval(() => {
+      setOperator(prev => {
+        const { charge, cCredsToAdd } = EngineSystem.updateEngineOnTick({ ...prev.engine });
+        return {
+          ...prev,
+          cCreds: prev.cCreds + cCredsToAdd,
+          engine: { ...prev.engine, charge, lastUpdated: Date.now() }
+        };
+      });
+    }, 5000);
+    return () => clearInterval(engineTickInterval);
+  }, []);
+
+  React.useEffect(() => {
     const appData = { operator, history: workoutHistory, resonance, awakened };
     localStorage.setItem('aegis_app_data', JSON.stringify(appData));
   }, [operator, workoutHistory, resonance, awakened]);
